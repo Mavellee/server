@@ -38,7 +38,9 @@ export async function candidateWhere(userId: string): Promise<{ where: Prisma.Us
     ]),
   ]);
   const exclude = new Set<string>([userId, ...blocked, ...acted.flat().map((a) => a.toUserId)]);
-  const sought = me.preferences.filter((x) => x.kind === "SOUGHT").map((x) => x.intention);
+  // Without explicit "sought" intentions, people are matched on their own intentions.
+  const soughtExplicit = me.preferences.filter((x) => x.kind === "SOUGHT").map((x) => x.intention);
+  const sought = soughtExplicit.length ? soughtExplicit : me.preferences.filter((x) => x.kind === "OWN").map((x) => x.intention);
 
   const where: Prisma.UserWhereInput = {
     id: { notIn: [...exclude] },

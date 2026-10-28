@@ -243,6 +243,8 @@ photosRouter.get("/:id", requireAuth, async (req, res) => {
   if (!photo) throw notFound();
   const viewerId = req.user!.id;
   if (photo.userId !== viewerId) {
+    // Other people's photos are for verified, unrestricted members only.
+    if (req.user!.status !== "ACTIVE") throw notFound();
     if (photo.status !== "APPROVED" || photo.user.status !== "ACTIVE") throw notFound();
     if (await isBlockedBetween(viewerId, photo.userId)) throw notFound();
   }

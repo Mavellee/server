@@ -68,3 +68,13 @@ describe("discovery filters", () => {
     expect((await (await loginAs(me)).get("/api/discovery")).status).toBe(400);
   });
 });
+
+describe("intention defaults", () => {
+  beforeEach(resetDb);
+  it("uses your own intentions when you haven't chosen which ones to see", async () => {
+    const me = await createUser({ name: "Me", gender: "WOMAN", interestedIn: ["MAN"], intentions: ["MARRIAGE"] });
+    await createUser({ name: "Commit", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["MARRIAGE", "SINGLE"] });
+    await createUser({ name: "Explore", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["SINGLE"] });
+    expect(names(await (await loginAs(me)).get("/api/discovery"))).toEqual(["Commit"]);
+  });
+});
