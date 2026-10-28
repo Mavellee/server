@@ -1,0 +1,681 @@
+// Knot data model. Pair tables store userAId < userBId so one pair = one row.
+// Locations are rounded (2 decimals ≈ 1 km) before they are stored; exact coordinates are never kept.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- ENUMS ----------
+
+enum Role {
+  USER
+  EXPERT
+  MODERATOR
+  ADMIN
+}
+
+enum AccountStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_DELETION
+}
+
+enum Gender {
+  WOMAN
+  MAN
+  NON_BINARY
+  TRANSGENDER_WOMAN
+  TRANSGENDER_MAN
+  GENDERQUEER
+  OTHER
+}
+
+enum Intention {
+  SINGLE
+  SITUATIONSHIP
+  MARRIAGE
+}
+
+enum PreferenceKind {
+  OWN // what I am looking for
+  SOUGHT // intentions I want to see in others
+}
+
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum PhotoStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MatchStatus {
+  ACTIVE
+  UNMATCHED
+  BLOCKED
+}
+
+enum MessageKind {
+  TEXT
+  IMAGE
+  SYSTEM
+}
+
+enum CompatibilityDimension {
+  RELATIONSHIP_GOALS
+  COMMUNICATION
+  LIFESTYLE
+  INTERESTS
+  VALUES
+}
+
+enum ExpertStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum ExpertRequestStatus {
+  PENDING
+  IN_REVIEW
+  INFO_REQUESTED
+  COMPLETED
+  DECLINED
+  CANCELLED
+}
+
+enum ExpertReviewAction {
+  CLAIMED
+  INFO_REQUESTED
+  INFO_PROVIDED
+  COMPLETED
+  DECLINED
+  CANCELLED
+}
+
+enum GameCategory {
+  RED_FLAG_GREEN_FLAG
+  KNOW_EACH_OTHER
+  DEEP_QUESTIONS
+  WOULD_YOU_RATHER
+  LOYALTY_BOUNDARIES
+  LOVE_LANGUAGES
+  FUN_CHALLENGES
+}
+
+enum GameSessionStatus {
+  ACTIVE
+  COMPLETED
+  ENDED
+}
+
+enum ReportTarget {
+  USER
+  PROFILE
+  MESSAGE
+}
+
+enum ReportReason {
+  HARASSMENT
+  FAKE_PROFILE
+  SCAM
+  UNDERAGE
+  INAPPROPRIATE_CONTENT
+  HATE
+  THREAT
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+enum NotificationType {
+  MATCH
+  MESSAGE
+  EXPERT_UPDATE
+  GAME_INVITE
+  SAFETY
+  ACCOUNT
+}
+
+enum AIStatus {
+  OK
+  FALLBACK
+  ERROR
+  RATE_LIMITED
+}
+
+enum SubscriptionPlan {
+  FREE
+  PLUS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+// ---------- ACCOUNTS ----------
+
+model User {
+  id              String        @id @default(uuid()) @db.Uuid
+  email           String        @unique // stored lower-cased
+  passwordHash    String
+  role            Role          @default(USER)
+  status          AccountStatus @default(PENDING_VERIFICATION)
+  emailVerifiedAt DateTime?
+  dateOfBirth     DateTime?     @db.Date // private; only age is ever exposed
+  ageConfirmedAt  DateTime?
+  onboardedAt     DateTime?
+  lastActiveAt    DateTime?
+  deletionRequestedAt DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  profile           Profile?
+  settings          UserSettings?
+  sessions          Session[]
+  authTokens        AuthToken[]
+  photos            ProfilePhoto[]
+  preferences       RelationshipPreference[]
+  interests         UserInterest[]
+  answers           CompatibilityAnswer[]
+  likesSent         Like[]          @relation("LikeFrom")
+  likesReceived     Like[]          @relation("LikeTo")
+  passesSent        Pass[]          @relation("PassFrom")
+  passesReceived    Pass[]          @relation("PassTo")
+  matchesA          Match[]         @relation("MatchA")
+  matchesB          Match[]         @relation("MatchB")
+  memberships       ConversationMember[]
+  messages          Message[]
+  expertProfile     ExpertProfile?  @relation("ExpertOwner")
+  expertRequests    ExpertReviewRequest[] @relation("Requester")
+  assignedRequests  ExpertReviewRequest[] @relation("AssignedExpert")
+  expertReviews     ExpertReview[]
+  gameSessionsHosted GameSession[]  @relation("GameHost")
+  gameSessionsJoined GameSession[]  @relation("GamePartner")
+  gameAnswers       GameAnswer[]
+  blocksMade        Block[]         @relation("Blocker")
+  blocksReceived    Block[]         @relation("Blocked")
+  reportsMade       Report[]        @relation("Reporter")
+  reportsReceived   Report[]        @relation("Reported")
+  reportsHandled    Report[]        @relation("ReportHandler")
+  notifications     Notification[]
+  aiUsage           AIUsage[]
+  subscription      Subscription?
+
+  @@index([status, role])
+}
+
+model Session {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique
+  userAgent  String?
+  ip         String?
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuthToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  type      TokenType
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model UserSettings {
+  userId           String   @id @db.Uuid
+  aiEnabled        Boolean  @default(true)
+  readReceipts     Boolean  @default(true)
+  typingIndicators Boolean  @default(true)
+  emailNotifications Boolean @default(true)
+  showDistance     Boolean  @default(true)
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------- PROFILE ----------
+
+model Profile {
+  userId          String    @id @db.Uuid
+  displayName     String
+  gender          Gender
+  interestedIn    Gender[]
+  bio             String?
+  city            String?
+  latitude        Decimal?  @db.Decimal(5, 2)
+  longitude       Decimal?  @db.Decimal(5, 2)
+  languages       String[]
+  ageMin          Int       @default(18)
+  ageMax          Int       @default(60)
+  maxDistanceKm   Int?      // null = anywhere
+  isPublished     Boolean   @default(false)
+  isDiscoverable  Boolean   @default(true)  // privacy: appear in others' Discover
+  discoveryPausedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isPublished, isDiscoverable, gender])
+  @@index([latitude, longitude])
+}
+
+model ProfilePhoto {
+  id         String      @id @default(uuid()) @db.Uuid
+  userId     String      @db.Uuid
+  storageKey String      @unique
+  mimeType   String
+  sizeBytes  Int
+  position   Int
+  status     PhotoStatus @default(APPROVED)
+  createdAt  DateTime    @default(now())
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, position])
+}
+
+model RelationshipPreference {
+  id        String         @id @default(uuid()) @db.Uuid
+  userId    String         @db.Uuid
+  kind      PreferenceKind
+  intention Intention
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind, intention])
+  @@index([kind, intention])
+}
+
+model Interest {
+  id       String         @id @default(uuid()) @db.Uuid
+  slug     String         @unique
+  name     String
+  category String
+  users    UserInterest[]
+}
+
+model UserInterest {
+  userId     String   @db.Uuid
+  interestId String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interest   Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
+
+  @@id([userId, interestId])
+  @@index([interestId])
+}
+
+// ---------- COMPATIBILITY ----------
+
+model CompatibilityQuestion {
+  id        String                 @id @default(uuid()) @db.Uuid
+  key       String                 @unique
+  dimension CompatibilityDimension
+  prompt    String
+  options   Json // [{ value, label }]
+  sortOrder Int                    @default(0)
+  isActive  Boolean                @default(true)
+  answers   CompatibilityAnswer[]
+}
+
+model CompatibilityAnswer {
+  id            String                @id @default(uuid()) @db.Uuid
+  userId        String                @db.Uuid
+  questionId    String                @db.Uuid
+  answer        String
+  acceptable    String[] // partner answers I am happy with; empty = any
+  importance    Int                   @default(1) // 0 = not important .. 3 = very important
+  isDealbreaker Boolean               @default(false)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question      CompatibilityQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+}
+
+// Audit trail of every score shown to a user.
+model CompatibilityResult {
+  id         String   @id @default(uuid()) @db.Uuid
+  userAId    String   @db.Uuid
+  userBId    String   @db.Uuid
+  version    String
+  inputsHash String
+  score      Int?
+  inputs     Json
+  breakdown  Json
+  computedAt DateTime @default(now())
+
+  // A new row is written only when the version or the inputs change.
+  @@unique([userAId, userBId, version, inputsHash])
+  @@index([userAId, userBId])
+}
+
+// ---------- LIKES & MATCHES ----------
+
+model Like {
+  id         String   @id @default(uuid()) @db.Uuid
+  fromUserId String   @db.Uuid
+  toUserId   String   @db.Uuid
+  createdAt  DateTime @default(now())
+  from       User     @relation("LikeFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  to         User     @relation("LikeTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+  @@index([toUserId, createdAt])
+}
+
+model Pass {
+  fromUserId String   @db.Uuid
+  toUserId   String   @db.Uuid
+  createdAt  DateTime @default(now())
+  from       User     @relation("PassFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  to         User     @relation("PassTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@id([fromUserId, toUserId])
+}
+
+model Match {
+  id           String        @id @default(uuid()) @db.Uuid
+  userAId      String        @db.Uuid
+  userBId      String        @db.Uuid
+  status       MatchStatus   @default(ACTIVE)
+  endedById    String?       @db.Uuid
+  endedAt      DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userA        User          @relation("MatchA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB        User          @relation("MatchB", fields: [userBId], references: [id], onDelete: Cascade)
+  conversation Conversation?
+  gameSessions GameSession[]
+
+  @@unique([userAId, userBId])
+  @@index([userAId, status])
+  @@index([userBId, status])
+}
+
+// ---------- CHAT ----------
+
+model Conversation {
+  id            String               @id @default(uuid()) @db.Uuid
+  matchId       String               @unique @db.Uuid
+  lastMessageAt DateTime?
+  createdAt     DateTime             @default(now())
+  match         Match                @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  members       ConversationMember[]
+  messages      Message[]
+
+  @@index([lastMessageAt])
+}
+
+model ConversationMember {
+  conversationId String       @db.Uuid
+  userId         String       @db.Uuid
+  lastReadAt     DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(uuid()) @db.Uuid
+  conversationId String       @db.Uuid
+  senderId       String?      @db.Uuid
+  kind           MessageKind  @default(TEXT)
+  body           String?
+  attachmentKey  String?
+  clientId       String? // idempotency key from the sender's device
+  createdAt      DateTime     @default(now())
+  deletedAt      DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User?        @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  reports        Report[]
+
+  @@unique([conversationId, senderId, clientId])
+  @@index([conversationId, createdAt(sort: Desc)])
+}
+
+// ---------- COMPATIBILITY EXPERTS ----------
+
+model ExpertProfile {
+  userId          String       @id @db.Uuid
+  headline        String
+  bio             String
+  experienceYears Int
+  credentials     String? // self-declared unless credentialsVerifiedAt is set
+  specialties     String[]
+  status          ExpertStatus @default(PENDING)
+  credentialsVerifiedAt DateTime?
+  decisionNote    String?
+  decidedById     String?      @db.Uuid
+  decidedAt       DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  user            User         @relation("ExpertOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+model ExpertReviewRequest {
+  id           String              @id @default(uuid()) @db.Uuid
+  requesterId  String              @db.Uuid
+  expertId     String?             @db.Uuid
+  topic        String
+  question     String
+  sharedData   Json // snapshot of exactly what the user consented to share
+  sharedFields String[]
+  status       ExpertRequestStatus @default(PENDING)
+  consentedAt  DateTime
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  completedAt  DateTime?
+  requester    User                @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  expert       User?               @relation("AssignedExpert", fields: [expertId], references: [id], onDelete: SetNull)
+  reviews      ExpertReview[]
+
+  @@index([status, createdAt])
+  @@index([requesterId])
+  @@index([expertId, status])
+}
+
+// History of every step on a request.
+model ExpertReview {
+  id        String             @id @default(uuid()) @db.Uuid
+  requestId String             @db.Uuid
+  authorId  String?            @db.Uuid
+  action    ExpertReviewAction
+  message   String?
+  createdAt DateTime           @default(now())
+  request   ExpertReviewRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  author    User?              @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([requestId, createdAt])
+}
+
+// ---------- GAMES ----------
+
+model Game {
+  id          String         @id @default(uuid()) @db.Uuid
+  slug        String         @unique
+  name        String
+  description String
+  category    GameCategory   @unique
+  isActive    Boolean        @default(true)
+  questions   GameQuestion[]
+  sessions    GameSession[]
+}
+
+model GameQuestion {
+  id        String       @id @default(uuid()) @db.Uuid
+  gameId    String       @db.Uuid
+  prompt    String
+  options   Json? // e.g. ["Red flag", "Green flag"] or ["A", "B"]
+  sortOrder Int          @default(0)
+  isActive  Boolean      @default(true)
+  game      Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers   GameAnswer[]
+
+  @@index([gameId, sortOrder])
+}
+
+model GameSession {
+  id            String            @id @default(uuid()) @db.Uuid
+  gameId        String            @db.Uuid
+  hostId        String            @db.Uuid
+  partnerId     String?           @db.Uuid
+  matchId       String?           @db.Uuid
+  status        GameSessionStatus @default(ACTIVE)
+  questionIds   String[]
+  currentIndex  Int               @default(0)
+  turnUserId    String?           @db.Uuid
+  createdAt     DateTime          @default(now())
+  endedAt       DateTime?
+  game          Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  host          User              @relation("GameHost", fields: [hostId], references: [id], onDelete: Cascade)
+  partner       User?             @relation("GamePartner", fields: [partnerId], references: [id], onDelete: Cascade)
+  match         Match?            @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  answers       GameAnswer[]
+
+  @@index([hostId, status])
+  @@index([partnerId, status])
+  @@index([matchId])
+}
+
+model GameAnswer {
+  id         String       @id @default(uuid()) @db.Uuid
+  sessionId  String       @db.Uuid
+  questionId String       @db.Uuid
+  userId     String       @db.Uuid
+  answer     String?
+  skipped    Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  session    GameSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question   GameQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, questionId, userId])
+}
+
+// ---------- SAFETY ----------
+
+model Block {
+  blockerId String   @db.Uuid
+  blockedId String   @db.Uuid
+  createdAt DateTime @default(now())
+  blocker   User     @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model Report {
+  id             String       @id @default(uuid()) @db.Uuid
+  reporterId     String       @db.Uuid
+  reportedUserId String       @db.Uuid
+  target         ReportTarget
+  messageId      String?      @db.Uuid
+  reason         ReportReason
+  details        String?
+  status         ReportStatus @default(OPEN)
+  handledById    String?      @db.Uuid
+  resolution     String?
+  createdAt      DateTime     @default(now())
+  resolvedAt     DateTime?
+  reporter       User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser   User         @relation("Reported", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  handledBy      User?        @relation("ReportHandler", fields: [handledById], references: [id], onDelete: SetNull)
+  message        Message?     @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([reportedUserId])
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  type      NotificationType
+  title     String
+  body      String?
+  data      Json             @default("{}")
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
+
+// Metadata only: never the prompt or the generated text.
+model AIUsage {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String?  @db.Uuid
+  feature     String
+  provider    String
+  model       String?
+  status      AIStatus
+  inputChars  Int      @default(0)
+  outputChars Int      @default(0)
+  latencyMs   Int      @default(0)
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+model Subscription {
+  id               String             @id @default(uuid()) @db.Uuid
+  userId           String             @unique @db.Uuid
+  plan             SubscriptionPlan   @default(FREE)
+  status           SubscriptionStatus @default(ACTIVE)
+  currentPeriodEnd DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Append-only (enforced by a trigger in the migration). No FK so history survives deletions.
+model AdminAuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String?  @db.Uuid
+  actorRole  Role?
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   Json     @default("{}")
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
