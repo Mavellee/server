@@ -7,9 +7,15 @@ import { notify } from "../../lib/notify.js";
 import { requireActive } from "../../middleware/auth.js";
 import { emitToUser } from "../../realtime/bus.js";
 import { cleanText } from "../chat/service.js";
+import { catalog } from "../chatgames/service.js";
 
 export const gamesRouter = Router();
 gamesRouter.use(requireActive);
+
+/** Catalogue for the in-chat launcher: players, duration and a preview of each deck. */
+gamesRouter.get("/catalog", async (_req, res) => {
+  ok(res, await catalog());
+});
 
 gamesRouter.get("/", async (_req, res) => {
   const games = await prisma.game.findMany({
@@ -44,6 +50,9 @@ gamesRouter.post("/sessions", async (req, res) => {
 
   let partnerId: string | null = null;
   if (body.matchId) {
+    throw badRequest("Games with a match are played inside your conversation. Open the chat and tap the games button.");
+  }
+  if (partnerId) {
     const match = await prisma.match.findFirst({ where: { id: body.matchId, status: "ACTIVE", OR: [{ userAId: me }, { userBId: me }] } });
     if (!match) throw notFound("Match not found.");
     partnerId = match.userAId === me ? match.userBId : match.userAId;

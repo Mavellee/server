@@ -29,8 +29,10 @@ export function cleanText(text: string) {
   return text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
 }
 
-export function serializeMessage(m: { id: string; conversationId: string; senderId: string | null; kind: string; body: string | null; attachmentKey: string | null; clientId: string | null; createdAt: Date }) {
+export function serializeMessage(m: { id: string; conversationId: string; senderId: string | null; kind: string; body: string | null; attachmentKey: string | null; clientId: string | null; createdAt: Date; gameSessionId?: string | null; metadata?: unknown }) {
   return {
+    gameSessionId: m.gameSessionId ?? null,
+    metadata: (m.metadata as Record<string, unknown> | null) ?? null,
     id: m.id,
     conversationId: m.conversationId,
     senderId: m.senderId,

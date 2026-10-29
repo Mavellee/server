@@ -8,6 +8,7 @@ import { SESSION_COOKIE, userForToken } from "../middleware/auth.js";
 import { assertMember, markRead, sendMessage, MAX_MESSAGE_LENGTH } from "../modules/chat/service.js";
 import { prisma } from "../db.js";
 import { conversationRoom, setIo, userRoom } from "./bus.js";
+import { socketConnected, socketDisconnected } from "./presence.js";
 
 function readCookie(header: string | undefined, name: string) {
   if (!header) return undefined;
@@ -53,6 +54,8 @@ export function createSocketServer(http: HttpServer) {
   io.on("connection", (socket) => {
     const userId: string = socket.data.userId;
     socket.join(userRoom(userId));
+    socketConnected(userId);
+    socket.on("disconnect", () => socketDisconnected(userId));
 
     const handle =
       <T>(schema: z.ZodSchema<T>, fn: (input: T) => Promise<unknown>) =>

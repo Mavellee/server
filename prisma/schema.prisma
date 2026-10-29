@@ -70,6 +70,7 @@ enum MessageKind {
   TEXT
   IMAGE
   SYSTEM
+  GAME // timeline card for an in-chat game (see Message.gameSessionId)
 }
 
 enum CompatibilityDimension {
@@ -118,7 +119,16 @@ enum GameCategory {
 enum GameSessionStatus {
   ACTIVE
   COMPLETED
-  ENDED
+  ENDED // legacy page-based sessions only
+  WAITING // in-chat: started, waiting for the partner to join
+  PAUSED
+  CANCELLED
+}
+
+enum GameRoundStatus {
+  OPEN // collecting private answers
+  REVEALED
+  SKIPPED
 }
 
 enum ReportTarget {
@@ -175,51 +185,53 @@ enum SubscriptionStatus {
 // ---------- ACCOUNTS ----------
 
 model User {
-  id              String        @id @default(uuid()) @db.Uuid
-  email           String        @unique // stored lower-cased
-  passwordHash    String
-  role            Role          @default(USER)
-  status          AccountStatus @default(PENDING_VERIFICATION)
-  emailVerifiedAt DateTime?
-  dateOfBirth     DateTime?     @db.Date // private; only age is ever exposed
-  ageConfirmedAt  DateTime?
-  onboardedAt     DateTime?
-  lastActiveAt    DateTime?
+  id                  String        @id @default(uuid()) @db.Uuid
+  email               String        @unique // stored lower-cased
+  passwordHash        String
+  role                Role          @default(USER)
+  status              AccountStatus @default(PENDING_VERIFICATION)
+  emailVerifiedAt     DateTime?
+  dateOfBirth         DateTime?     @db.Date // private; only age is ever exposed
+  ageConfirmedAt      DateTime?
+  onboardedAt         DateTime?
+  lastActiveAt        DateTime?
   deletionRequestedAt DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
-  profile           Profile?
-  settings          UserSettings?
-  sessions          Session[]
-  authTokens        AuthToken[]
-  photos            ProfilePhoto[]
-  preferences       RelationshipPreference[]
-  interests         UserInterest[]
-  answers           CompatibilityAnswer[]
-  likesSent         Like[]          @relation("LikeFrom")
-  likesReceived     Like[]          @relation("LikeTo")
-  passesSent        Pass[]          @relation("PassFrom")
-  passesReceived    Pass[]          @relation("PassTo")
-  matchesA          Match[]         @relation("MatchA")
-  matchesB          Match[]         @relation("MatchB")
-  memberships       ConversationMember[]
-  messages          Message[]
-  expertProfile     ExpertProfile?  @relation("ExpertOwner")
-  expertRequests    ExpertReviewRequest[] @relation("Requester")
-  assignedRequests  ExpertReviewRequest[] @relation("AssignedExpert")
-  expertReviews     ExpertReview[]
-  gameSessionsHosted GameSession[]  @relation("GameHost")
-  gameSessionsJoined GameSession[]  @relation("GamePartner")
-  gameAnswers       GameAnswer[]
-  blocksMade        Block[]         @relation("Blocker")
-  blocksReceived    Block[]         @relation("Blocked")
-  reportsMade       Report[]        @relation("Reporter")
-  reportsReceived   Report[]        @relation("Reported")
-  reportsHandled    Report[]        @relation("ReportHandler")
-  notifications     Notification[]
-  aiUsage           AIUsage[]
-  subscription      Subscription?
+  profile            Profile?
+  settings           UserSettings?
+  sessions           Session[]
+  authTokens         AuthToken[]
+  photos             ProfilePhoto[]
+  preferences        RelationshipPreference[]
+  interests          UserInterest[]
+  answers            CompatibilityAnswer[]
+  likesSent          Like[]                   @relation("LikeFrom")
+  likesReceived      Like[]                   @relation("LikeTo")
+  passesSent         Pass[]                   @relation("PassFrom")
+  passesReceived     Pass[]                   @relation("PassTo")
+  matchesA           Match[]                  @relation("MatchA")
+  matchesB           Match[]                  @relation("MatchB")
+  memberships        ConversationMember[]
+  messages           Message[]
+  expertProfile      ExpertProfile?           @relation("ExpertOwner")
+  expertRequests     ExpertReviewRequest[]    @relation("Requester")
+  assignedRequests   ExpertReviewRequest[]    @relation("AssignedExpert")
+  expertReviews      ExpertReview[]
+  gameSessionsHosted GameSession[]            @relation("GameHost")
+  gameSessionsJoined GameSession[]            @relation("GamePartner")
+  gameAnswers        GameAnswer[]
+  gameParticipations GameParticipant[]
+  gameRoundAnswers   GameRoundAnswer[]
+  blocksMade         Block[]                  @relation("Blocker")
+  blocksReceived     Block[]                  @relation("Blocked")
+  reportsMade        Report[]                 @relation("Reporter")
+  reportsReceived    Report[]                 @relation("Reported")
+  reportsHandled     Report[]                 @relation("ReportHandler")
+  notifications      Notification[]
+  aiUsage            AIUsage[]
+  subscription       Subscription?
 
   @@index([status, role])
 }
@@ -253,37 +265,37 @@ model AuthToken {
 }
 
 model UserSettings {
-  userId           String   @id @db.Uuid
-  aiEnabled        Boolean  @default(true)
-  readReceipts     Boolean  @default(true)
-  typingIndicators Boolean  @default(true)
-  emailNotifications Boolean @default(true)
-  showDistance     Boolean  @default(true)
-  updatedAt        DateTime @updatedAt
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId             String   @id @db.Uuid
+  aiEnabled          Boolean  @default(true)
+  readReceipts       Boolean  @default(true)
+  typingIndicators   Boolean  @default(true)
+  emailNotifications Boolean  @default(true)
+  showDistance       Boolean  @default(true)
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ---------- PROFILE ----------
 
 model Profile {
-  userId          String    @id @db.Uuid
-  displayName     String
-  gender          Gender
-  interestedIn    Gender[]
-  bio             String?
-  city            String?
-  latitude        Decimal?  @db.Decimal(5, 2)
-  longitude       Decimal?  @db.Decimal(5, 2)
-  languages       String[]
-  ageMin          Int       @default(18)
-  ageMax          Int       @default(60)
-  maxDistanceKm   Int?      // null = anywhere
-  isPublished     Boolean   @default(false)
-  isDiscoverable  Boolean   @default(true)  // privacy: appear in others' Discover
+  userId            String    @id @db.Uuid
+  displayName       String
+  gender            Gender
+  interestedIn      Gender[]
+  bio               String?
+  city              String?
+  latitude          Decimal?  @db.Decimal(5, 2)
+  longitude         Decimal?  @db.Decimal(5, 2)
+  languages         String[]
+  ageMin            Int       @default(18)
+  ageMax            Int       @default(60)
+  maxDistanceKm     Int? // null = anywhere
+  isPublished       Boolean   @default(false)
+  isDiscoverable    Boolean   @default(true) // privacy: appear in others' Discover
   discoveryPausedAt DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([isPublished, isDiscoverable, gender])
   @@index([latitude, longitude])
@@ -432,6 +444,7 @@ model Conversation {
   match         Match                @relation(fields: [matchId], references: [id], onDelete: Cascade)
   members       ConversationMember[]
   messages      Message[]
+  gameSessions  GameSession[]
 
   @@index([lastMessageAt])
 }
@@ -457,8 +470,11 @@ model Message {
   clientId       String? // idempotency key from the sender's device
   createdAt      DateTime     @default(now())
   deletedAt      DateTime?
+  gameSessionId  String?      @db.Uuid
+  metadata       Json?
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User?        @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  gameSession    GameSession? @relation(fields: [gameSessionId], references: [id], onDelete: SetNull)
   reports        Report[]
 
   @@unique([conversationId, senderId, clientId])
@@ -468,20 +484,20 @@ model Message {
 // ---------- COMPATIBILITY EXPERTS ----------
 
 model ExpertProfile {
-  userId          String       @id @db.Uuid
-  headline        String
-  bio             String
-  experienceYears Int
-  credentials     String? // self-declared unless credentialsVerifiedAt is set
-  specialties     String[]
-  status          ExpertStatus @default(PENDING)
+  userId                String       @id @db.Uuid
+  headline              String
+  bio                   String
+  experienceYears       Int
+  credentials           String? // self-declared unless credentialsVerifiedAt is set
+  specialties           String[]
+  status                ExpertStatus @default(PENDING)
   credentialsVerifiedAt DateTime?
-  decisionNote    String?
-  decidedById     String?      @db.Uuid
-  decidedAt       DateTime?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  user            User         @relation("ExpertOwner", fields: [userId], references: [id], onDelete: Cascade)
+  decisionNote          String?
+  decidedById           String?      @db.Uuid
+  decidedAt             DateTime?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  user                  User         @relation("ExpertOwner", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([status])
 }
@@ -510,14 +526,14 @@ model ExpertReviewRequest {
 
 // History of every step on a request.
 model ExpertReview {
-  id        String             @id @default(uuid()) @db.Uuid
-  requestId String             @db.Uuid
-  authorId  String?            @db.Uuid
+  id        String              @id @default(uuid()) @db.Uuid
+  requestId String              @db.Uuid
+  authorId  String?             @db.Uuid
   action    ExpertReviewAction
   message   String?
-  createdAt DateTime           @default(now())
+  createdAt DateTime            @default(now())
   request   ExpertReviewRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  author    User?              @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author    User?               @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@index([requestId, createdAt])
 }
@@ -544,31 +560,92 @@ model GameQuestion {
   isActive  Boolean      @default(true)
   game      Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
   answers   GameAnswer[]
+  rounds    GameRound[]
 
   @@index([gameId, sortOrder])
 }
 
 model GameSession {
-  id            String            @id @default(uuid()) @db.Uuid
-  gameId        String            @db.Uuid
-  hostId        String            @db.Uuid
-  partnerId     String?           @db.Uuid
-  matchId       String?           @db.Uuid
-  status        GameSessionStatus @default(ACTIVE)
-  questionIds   String[]
-  currentIndex  Int               @default(0)
-  turnUserId    String?           @db.Uuid
-  createdAt     DateTime          @default(now())
-  endedAt       DateTime?
-  game          Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  host          User              @relation("GameHost", fields: [hostId], references: [id], onDelete: Cascade)
-  partner       User?             @relation("GamePartner", fields: [partnerId], references: [id], onDelete: Cascade)
-  match         Match?            @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  answers       GameAnswer[]
+  id             String            @id @default(uuid()) @db.Uuid
+  gameId         String            @db.Uuid
+  hostId         String            @db.Uuid
+  partnerId      String?           @db.Uuid
+  matchId        String?           @db.Uuid
+  status         GameSessionStatus @default(ACTIVE)
+  questionIds    String[]
+  currentIndex   Int               @default(0)
+  turnUserId     String?           @db.Uuid
+  createdAt      DateTime          @default(now())
+  endedAt        DateTime?
+  // In-chat sessions (conversationId set) use rounds/participants; legacy solo sessions use answers.
+  conversationId String?           @db.Uuid
+  rulesVersion   Int               @default(1)
+  config         Json              @default("{}")
+  startedAt      DateTime?
+  pausedAt       DateTime?
+  endedById      String?           @db.Uuid
+  version        Int               @default(0) // bumped on every state change
+  game           Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  host           User              @relation("GameHost", fields: [hostId], references: [id], onDelete: Cascade)
+  partner        User?             @relation("GamePartner", fields: [partnerId], references: [id], onDelete: Cascade)
+  match          Match?            @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  conversation   Conversation?     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  answers        GameAnswer[]
+  participants   GameParticipant[]
+  rounds         GameRound[]
+  messages       Message[]
 
   @@index([hostId, status])
   @@index([partnerId, status])
   @@index([matchId])
+  @@index([conversationId, createdAt])
+}
+
+model GameParticipant {
+  id        String      @id @default(uuid()) @db.Uuid
+  sessionId String      @db.Uuid
+  userId    String      @db.Uuid
+  joinedAt  DateTime?
+  createdAt DateTime    @default(now())
+  session   GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([userId])
+}
+
+model GameRound {
+  id            String            @id @default(uuid()) @db.Uuid
+  sessionId     String            @db.Uuid
+  index         Int
+  questionId    String            @db.Uuid
+  status        GameRoundStatus   @default(OPEN)
+  subjectUserId String?           @db.Uuid // "know each other": whose life the question is about
+  revealedAt    DateTime?
+  createdAt     DateTime          @default(now())
+  session       GameSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question      GameQuestion      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers       GameRoundAnswer[]
+
+  @@unique([sessionId, index])
+}
+
+// Private until the round is revealed; never returned to the other player before then.
+model GameRoundAnswer {
+  id        String    @id @default(uuid()) @db.Uuid
+  roundId   String    @db.Uuid
+  userId    String    @db.Uuid
+  choice    String?
+  text      String?
+  skipped   Boolean   @default(false)
+  note      String? // optional explanation added after the reveal
+  correct   Boolean? // "know each other": set by the subject after the reveal
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  round     GameRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roundId, userId])
 }
 
 model GameAnswer {

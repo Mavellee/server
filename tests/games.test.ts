@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { prisma } from "../src/db.js";
 import { createUser, loginAs, match, resetDb } from "./helpers.js";
 
 beforeEach(resetDb);
@@ -17,38 +16,23 @@ describe("couple games", () => {
     let state = (await s.post("/api/games/sessions", { gameSlug: "red-flag-green-flag", questionCount: 3 })).body.data;
     expect(state.progress).toEqual({ index: 0, total: 3 });
     expect((await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "Maybe?" })).status).toBe(400);
+    // Red Flag decks now include a yellow flag.
     state = (await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "Green flag" })).body.data;
     expect(state.progress.index).toBe(1);
     state = (await s.post(`/api/games/sessions/${state.id}/skip`)).body.data;
-    state = (await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "Depends" })).body.data;
+    state = (await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "Yellow flag" })).body.data;
     expect(state.status).toBe("COMPLETED");
     expect(state.recap).toHaveLength(3);
     expect(state.recap[1].skipped).toBe(true);
   });
 
-  it("shared sessions reveal a partner's answer only after you answer, and alternate turns", async () => {
+  it("no longer runs shared games outside the conversation", async () => {
     const a = await createUser();
     const b = await createUser();
-    const { sa, sb, matchId } = await match(a, b);
-    const created = await sa.post("/api/games/sessions", { gameSlug: "deep-questions", matchId, questionCount: 3 });
-    const id = created.body.data.id;
-    expect(created.body.data.turnUserId).toBe(a.id);
-    expect(await prisma.notification.count({ where: { userId: b.id, type: "GAME_INVITE" } })).toBe(1);
-
-    await sa.post(`/api/games/sessions/${id}/answer`, { answer: "When I'm outdoors." });
-    let bView = (await sb.get(`/api/games/sessions/${id}`)).body.data;
-    expect(bView.partnerAnswered).toBe(true);
-    expect(bView.partnerAnswer).toBeNull(); // not revealed yet
-    expect((await sb.post(`/api/games/sessions/${id}/next`)).status).toBe(400);
-
-    bView = (await sb.post(`/api/games/sessions/${id}/answer`, { answer: "Cooking for friends." })).body.data;
-    expect(bView.partnerAnswer.answer).toBe("When I'm outdoors.");
-    const next = (await sb.post(`/api/games/sessions/${id}/next`)).body.data;
-    expect(next.progress.index).toBe(1);
-    expect(next.turnUserId).toBe(b.id);
-
-    expect((await sa.post(`/api/games/sessions/${id}/end`)).status).toBe(200);
-    expect((await sb.get(`/api/games/sessions/${id}`)).body.data.status).toBe("ENDED");
+    const { sa, matchId } = await match(a, b);
+    const res = await sa.post("/api/games/sessions", { gameSlug: "deep-questions", matchId });
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toMatch(/inside your conversation/);
   });
 
   it("keeps game sessions private to their players", async () => {
@@ -59,12 +43,4 @@ describe("couple games", () => {
     expect((await other.post(`/api/games/sessions/${id}/answer`, { answer: "Option A" })).status).toBe(404);
   });
 
-  it("closes shared games when the match ends", async () => {
-    const a = await createUser();
-    const b = await createUser();
-    const { sa, sb, matchId } = await match(a, b);
-    const id = (await sa.post("/api/games/sessions", { gameSlug: "fun-challenges", matchId })).body.data.id;
-    await sb.delete(`/api/matches/${matchId}`);
-    expect((await sa.get(`/api/games/sessions/${id}`)).status).toBe(404);
-  });
 });

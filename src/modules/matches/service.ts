@@ -4,6 +4,7 @@ import { badRequest, notFound } from "../../lib/http.js";
 import { isBlockedBetween, orderedPair } from "../../lib/safety.js";
 import { notify } from "../../lib/notify.js";
 import { closeConversationRoom, emitToUser } from "../../realtime/bus.js";
+import { cancelLiveGamesForConversation } from "../chatgames/service.js";
 
 /** Can `fromId` act on `toId` at all (like, pass, view)? */
 async function assertActionable(fromId: string, toId: string) {
@@ -85,6 +86,7 @@ export async function endMatch(userId: string, matchId: string, status: "UNMATCH
     data: { status, endedById: userId, endedAt: new Date() },
   });
   await prisma.gameSession.updateMany({ where: { matchId: match.id, status: "ACTIVE" }, data: { status: "ENDED", endedAt: new Date() } });
+  if (match.conversation) await cancelLiveGamesForConversation(match.conversation.id, userId);
   if (match.conversation) closeConversationRoom(match.conversation.id);
   const otherId = match.userAId === userId ? match.userBId : match.userAId;
   for (const id of [userId, otherId]) emitToUser(id, "match:ended", { matchId: match.id, conversationId: match.conversation?.id });

@@ -12,12 +12,14 @@ import { requireActive } from "../../middleware/auth.js";
 import { messageLimiter } from "../../middleware/security.js";
 import { publicProfileInclude, toPublicProfile } from "../profiles/serialize.js";
 import { assertMember, markRead, MAX_MESSAGE_LENGTH, sendMessage, serializeMessage } from "./service.js";
+import { chatGamesRouter } from "../chatgames/routes.js";
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: config.maxUploadBytes, files: 1 } });
 const idParam = z.object({ id: z.string().uuid() });
 
 export const conversationsRouter = Router();
 conversationsRouter.use(requireActive);
+conversationsRouter.use("/:id/games", chatGamesRouter);
 
 conversationsRouter.get("/", async (req, res) => {
   const me = req.user!.id;
@@ -48,7 +50,7 @@ conversationsRouter.get("/", async (req, res) => {
       id: c.id,
       matchId: c.matchId,
       other: toPublicProfile(other),
-      lastMessage: last ? { body: last.kind === "IMAGE" ? "Photo" : last.body, senderId: last.senderId, createdAt: last.createdAt } : null,
+      lastMessage: last ? { body: last.kind === "IMAGE" ? "Photo" : last.kind === "GAME" ? "Game update" : last.body, senderId: last.senderId, createdAt: last.createdAt } : null,
       unread,
       createdAt: c.createdAt,
     });
