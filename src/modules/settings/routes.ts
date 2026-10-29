@@ -6,6 +6,7 @@ import { requireAuth } from "../../middleware/auth.js";
 import { sensitiveLimiter } from "../../middleware/security.js";
 import { clearSessionCookie, revokeAllSessions, verifyPassword } from "../auth/service.js";
 import { endMatch } from "../matches/service.js";
+import { disconnectSessions } from "../../realtime/bus.js";
 
 export const DELETION_GRACE_DAYS = 30;
 
@@ -67,7 +68,8 @@ settingsRouter.get("/sessions", async (req, res) => {
 
 settingsRouter.delete("/sessions/:id", async (req, res) => {
   const { id } = parse(z.object({ id: z.string().uuid() }), req.params);
-  await prisma.session.updateMany({ where: { id, userId: req.user!.id }, data: { revokedAt: new Date() } });
+  const { count } = await prisma.session.updateMany({ where: { id, userId: req.user!.id }, data: { revokedAt: new Date() } });
+  if (count) disconnectSessions([id]);
   ok(res, { revoked: true });
 });
 

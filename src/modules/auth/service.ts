@@ -7,6 +7,7 @@ import { randomToken, sha256 } from "../../lib/crypto.js";
 import { SESSION_COOKIE } from "../../middleware/auth.js";
 import { mailer } from "../../lib/mailer.js";
 import { ageFrom } from "../../lib/age.js";
+import { disconnectSessions } from "../../realtime/bus.js";
 
 // Argon2id with OWASP-recommended minimums (19 MiB, 2 iterations).
 const HASH_OPTIONS = { type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 } as const;
@@ -51,10 +52,10 @@ export function clearSessionCookie(res: Response) {
 }
 
 export async function revokeAllSessions(userId: string, exceptSessionId?: string) {
-  await prisma.session.updateMany({
-    where: { userId, revokedAt: null, ...(exceptSessionId ? { NOT: { id: exceptSessionId } } : {}) },
-    data: { revokedAt: new Date() },
-  });
+  const where = { userId, revokedAt: null, ...(exceptSessionId ? { NOT: { id: exceptSessionId } } : {}) };
+  const live = await prisma.session.findMany({ where, select: { id: true } });
+  await prisma.session.updateMany({ where, data: { revokedAt: new Date() } });
+  disconnectSessions(live.map((s) => s.id));
 }
 
 const TOKEN_TTL: Record<TokenType, number> = {

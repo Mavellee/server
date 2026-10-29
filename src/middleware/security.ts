@@ -11,9 +11,21 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
  */
 export function originCheck(req: Request, _res: Response, next: NextFunction) {
   if (SAFE_METHODS.has(req.method)) return next();
-  const origin = req.get("origin") ?? (req.get("referer") ? new URL(req.get("referer")!).origin : undefined);
-  if (origin !== config.appOrigin) throw new ApiError(403, "BAD_ORIGIN", "Request origin not allowed.");
+  if (requestOrigin(req) !== config.appOrigin) throw new ApiError(403, "BAD_ORIGIN", "Request origin not allowed.");
   next();
+}
+
+/** Origin header, falling back to the Referer's origin; a malformed Referer counts as no origin. */
+function requestOrigin(req: Request) {
+  const origin = req.get("origin");
+  if (origin) return origin;
+  const referer = req.get("referer");
+  if (!referer) return undefined;
+  try {
+    return new URL(referer).origin;
+  } catch {
+    return undefined;
+  }
 }
 
 const limiter = (opts: Partial<Options>) =>

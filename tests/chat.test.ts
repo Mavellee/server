@@ -135,4 +135,42 @@ describe("real-time messaging (Socket.IO)", () => {
     const blocked = await emit(wc, "message:send", { conversationId, body: "sneaky" });
     expect(blocked.ok).toBe(false);
   });
+
+  const disconnected = (s: Socket) => new Promise<boolean>((r) => (s.disconnected ? r(true) : (s.once("disconnect", () => r(true)), setTimeout(() => r(false), 2000))));
+
+  it("disconnects a socket when its session logs out, so it stops receiving messages", async () => {
+    const a = await createUser();
+    const b = await createUser();
+    const { sa, sb, conversationId } = await match(a, b);
+    const [wa, wb] = await Promise.all([connect(await cookieOf(sa)), connect(await cookieOf(sb))]);
+    await emit(wb, "conversation:join", { conversationId });
+
+    let leaked = false;
+    wb.on("message:new", () => (leaked = true));
+    await sb.post("/api/auth/logout");
+    expect(await disconnected(wb)).toBe(true);
+    await emit(wa, "message:send", { conversationId, body: "after logout" });
+    expect(leaked).toBe(false);
+  });
+
+  it("disconnects sockets for a session revoked from settings, and keeps the current one", async () => {
+    const a = await createUser();
+    const phone = await loginAs(a);
+    const laptop = await loginAs(a);
+    const [wPhone, wLaptop] = await Promise.all([connect(await cookieOf(phone)), connect(await cookieOf(laptop))]);
+    const sessions = (await laptop.get("/api/settings/sessions")).body.data as { id: string; current: boolean }[];
+    const other = sessions.find((s) => !s.current)!;
+    await laptop.delete(`/api/settings/sessions/${other.id}`);
+    expect(await disconnected(wPhone)).toBe(true);
+    expect(wLaptop.connected).toBe(true);
+  });
+
+  it("disconnects every socket of a suspended member", async () => {
+    const member = await createUser();
+    const admin = await createUser({ role: "ADMIN" });
+    const w = await connect(await cookieOf(await loginAs(member)));
+    const sAdmin = await loginAs(admin);
+    expect((await sAdmin.post(`/api/admin/users/${member.id}/status`, { status: "SUSPENDED", reason: "Audit test" })).status).toBe(200);
+    expect(await disconnected(w)).toBe(true);
+  });
 });

@@ -97,6 +97,12 @@ describe("request protections", () => {
     expect(res.body.error.code).toBe("BAD_ORIGIN");
   });
 
+  it("treats a malformed Referer as a foreign origin rather than crashing", async () => {
+    const res = await request(app).post("/api/auth/login").set("Referer", "not a url").send({ email: "a@b.co", password: "x" });
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe("BAD_ORIGIN");
+  });
+
   it("rate-limits login attempts", async () => {
     let last = 0;
     for (let i = 0; i < 22; i++) {

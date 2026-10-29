@@ -16,6 +16,7 @@ import {
   startSession,
   verifyPassword,
 } from "./service.js";
+import { disconnectSessions } from "../../realtime/bus.js";
 
 export const password = z
   .string()
@@ -75,7 +76,10 @@ authRouter.post("/login", authLimiter, async (req, res) => {
 });
 
 authRouter.post("/logout", async (req, res) => {
-  if (req.sessionId) await prisma.session.update({ where: { id: req.sessionId }, data: { revokedAt: new Date() } });
+  if (req.sessionId) {
+    await prisma.session.update({ where: { id: req.sessionId }, data: { revokedAt: new Date() } });
+    disconnectSessions([req.sessionId]);
+  }
   clearSessionCookie(res);
   ok(res, { loggedOut: true });
 });

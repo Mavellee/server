@@ -26,3 +26,10 @@ export function getIo() {
 export function closeConversationRoom(conversationId: string) {
   io?.in(conversationRoom(conversationId)).socketsLeave(conversationRoom(conversationId));
 }
+
+export const sessionRoom = (sessionId: string) => `session:${sessionId}`;
+
+/** Drops live sockets for revoked sessions so they stop receiving events immediately. */
+export function disconnectSessions(sessionIds: string[]) {
+  for (const id of sessionIds) io?.in(sessionRoom(id)).disconnectSockets(true);
+}
