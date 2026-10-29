@@ -5,7 +5,7 @@ import { ApiError, badRequest, conflict, forbidden, notFound } from "../../lib/h
 import { notify } from "../../lib/notify.js";
 import { emitToConversation, emitToUser } from "../../realtime/bus.js";
 import { isOnline } from "../../realtime/presence.js";
-import { assertMember, cleanText, serializeMessage } from "../chat/service.js";
+import { assertMember, cleanText, nextMessageTime, serializeMessage } from "../chat/service.js";
 import { GAME_RULES, MAX_NOTE, MAX_TEXT, RULES_VERSION, type GameRules } from "./rules.js";
 import { assertCanAnswer, assertRoundTransition, assertTransition, LIVE_STATUSES } from "./stateMachine.js";
 
@@ -125,7 +125,8 @@ function announce(s: { id: string; conversationId: string | null; version: numbe
 }
 
 async function postTimelineCard(tx: Tx, s: { id: string; conversationId: string | null }, senderId: string | null, metadata: Prisma.InputJsonValue) {
-  const m = await tx.message.create({ data: { conversationId: s.conversationId!, senderId, kind: "GAME", gameSessionId: s.id, metadata } });
+  const createdAt = await nextMessageTime(tx, s.conversationId!);
+  const m = await tx.message.create({ data: { createdAt, conversationId: s.conversationId!, senderId, kind: "GAME", gameSessionId: s.id, metadata } });
   await tx.conversation.update({ where: { id: s.conversationId! }, data: { lastMessageAt: m.createdAt } });
   return m;
 }

@@ -91,10 +91,13 @@ export function createSocketServer(http: HttpServer) {
       }),
     );
 
-    socket.on(
-      "message:send",
-      handle(sendInput, ({ conversationId, body, clientId }) => sendMessage(userId, conversationId, { body, clientId })),
-    );
+    // One device's messages are handled strictly in the order it sent them; otherwise a later message
+    // can finish saving first and the conversation shows them out of order.
+    const send = handle(sendInput, ({ conversationId, body, clientId }) => sendMessage(userId, conversationId, { body, clientId }));
+    let sending: Promise<void> = Promise.resolve();
+    socket.on("message:send", (raw: unknown, ack?: Ack) => {
+      sending = sending.then(() => send(raw, ack));
+    });
 
     socket.on(
       "typing",

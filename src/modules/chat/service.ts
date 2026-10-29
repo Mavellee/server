@@ -54,6 +54,17 @@ export function checkSendRate(userId: string, limit = 30, windowMs = 60_000) {
   recentSends.set(userId, list);
 }
 
+/**
+ * The time for a new message in a conversation: strictly later than every earlier message there.
+ * Takes a per-conversation lock for the rest of the transaction, so concurrent senders queue up and
+ * messages never share a timestamp — ordering and "older than" paging are exact. Call inside a transaction.
+ */
+export async function nextMessageTime(tx: Prisma.TransactionClient, conversationId: string) {
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`conversation:${conversationId}`}, 0))`;
+  const last = await tx.message.findFirst({ where: { conversationId }, orderBy: { createdAt: "desc" }, select: { createdAt: true } });
+  return new Date(Math.max(Date.now(), (last?.createdAt.getTime() ?? 0) + 1));
+}
+
 export async function sendMessage(
   userId: string,
   conversationId: string,
@@ -73,8 +84,10 @@ export async function sendMessage(
   let message;
   try {
     message = await prisma.$transaction(async (tx) => {
+      const createdAt = await nextMessageTime(tx, conversationId);
       const m = await tx.message.create({
         data: {
+          createdAt,
           conversationId,
           senderId: userId,
           kind: input.attachmentKey ? "IMAGE" : "TEXT",

@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../../db.js";
 import { badRequest, notFound } from "../../lib/http.js";
 import { promptText } from "../../lib/prompts.js";
-import { cleanText } from "../chat/service.js";
+import { cleanText, nextMessageTime } from "../chat/service.js";
 import { isBlockedBetween, orderedPair } from "../../lib/safety.js";
 import { notify } from "../../lib/notify.js";
 import { closeConversationRoom, emitToUser } from "../../realtime/bus.js";
@@ -83,7 +83,8 @@ export async function likeUser(fromId: string, toId: string, detail?: LikeDetail
     let last: Date | null = null;
     for (const n of notes) {
       const ctx = await describeDetail(n.toUserId, n.detailKind, n.detailRef);
-      const m = await tx.message.create({ data: { conversationId: match.conversation!.id, senderId: n.fromUserId, body: n.comment!, metadata: ctx ? { detail: ctx } : undefined } });
+      const createdAt = await nextMessageTime(tx, match.conversation!.id);
+      const m = await tx.message.create({ data: { createdAt, conversationId: match.conversation!.id, senderId: n.fromUserId, body: n.comment!, metadata: ctx ? { detail: ctx } : undefined } });
       last = m.createdAt;
     }
     if (last) await tx.conversation.update({ where: { id: match.conversation!.id }, data: { lastMessageAt: last } });
