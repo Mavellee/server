@@ -6,7 +6,7 @@ import { blockedUserIds } from "../../lib/safety.js";
 import { requireActive } from "../../middleware/auth.js";
 import { publicProfileInclude, toPublicProfile } from "../profiles/serialize.js";
 import { viewerFor } from "../discovery/service.js";
-import { endMatch, likeUser, passUser } from "./service.js";
+import { describeDetail, endMatch, likeUser, passUser } from "./service.js";
 
 const target = z.object({ userId: z.string().uuid() });
 
@@ -14,8 +14,13 @@ export const likesRouter = Router();
 likesRouter.use(requireActive);
 
 likesRouter.post("/", async (req, res) => {
-  const { userId } = parse(target, req.body);
-  const result = await likeUser(req.user!.id, userId);
+  const { userId, detail } = parse(
+    target.extend({
+      detail: z.object({ kind: z.enum(["PROMPT", "INTEREST"]), ref: z.string().min(1).max(60), comment: z.string().max(400).optional() }).optional(),
+    }),
+    req.body,
+  );
+  const result = await likeUser(req.user!.id, userId, detail);
   ok(res, result, result.alreadyLiked ? 200 : 201);
 });
 
@@ -44,7 +49,12 @@ likesRouter.get("/received", async (req, res) => {
     take: 50,
   });
   const viewer = await viewerFor(me);
-  ok(res, likes.map((l) => ({ likedAt: l.createdAt, profile: toPublicProfile(l.from, viewer) })));
+  const out = [];
+  for (const l of likes) {
+    // The detail is about *my* profile, so describe it from my data.
+    out.push({ likedAt: l.createdAt, profile: toPublicProfile(l.from, viewer), detail: await describeDetail(me, l.detailKind, l.detailRef), comment: l.comment });
+  }
+  ok(res, out);
 });
 
 likesRouter.get("/sent", async (req, res) => {
@@ -57,7 +67,9 @@ likesRouter.get("/sent", async (req, res) => {
     take: 50,
   });
   const viewer = await viewerFor(me);
-  ok(res, likes.map((l) => ({ likedAt: l.createdAt, profile: toPublicProfile(l.to, viewer) })));
+  const out = [];
+  for (const l of likes) out.push({ likedAt: l.createdAt, profile: toPublicProfile(l.to, viewer), detail: await describeDetail(l.toUserId, l.detailKind, l.detailRef), comment: l.comment });
+  ok(res, out);
 });
 
 export const matchesRouter = Router();

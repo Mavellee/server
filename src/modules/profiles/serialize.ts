@@ -1,11 +1,13 @@
 import type { Prisma } from "@prisma/client";
 import { ageFrom } from "../../lib/age.js";
 import { approxDistanceLabel, distanceKm } from "../../lib/geo.js";
+import { promptText } from "../../lib/prompts.js";
 
 /** Everything needed to render a profile card. Note: no email, no date of birth, no coordinates leave this module. */
 export const publicProfileInclude = {
   profile: true,
-  photos: { where: { status: "APPROVED" }, orderBy: { position: "asc" }, select: { id: true } },
+  photos: { where: { status: "APPROVED" }, orderBy: { position: "asc" }, select: { id: true, focusX: true, focusY: true } },
+  prompts: { orderBy: { position: "asc" }, select: { promptKey: true, answer: true } },
   preferences: { where: { kind: "OWN" }, select: { intention: true } },
   interests: { include: { interest: true } },
   expertProfile: { select: { status: true } },
@@ -44,6 +46,9 @@ export function toPublicProfile(user: PublicProfileSource, viewer?: Viewer, opts
     interests,
     sharedInterestCount: interests.filter((i) => i.shared).length,
     photoIds: user.photos.map((ph) => ph.id),
+    photos: user.photos.map((ph) => ({ id: ph.id, focusX: ph.focusX, focusY: ph.focusY })),
+    prompts: user.prompts.filter((pr) => promptText(pr.promptKey)).map((pr) => ({ key: pr.promptKey, text: promptText(pr.promptKey)!, answer: pr.answer })),
+    isDemo: user.isDemo,
     isApprovedExpert: user.expertProfile?.status === "APPROVED",
   };
 }

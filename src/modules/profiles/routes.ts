@@ -10,6 +10,7 @@ import { ApiError, badRequest, notFound, ok, parse } from "../../lib/http.js";
 import { randomToken } from "../../lib/crypto.js";
 import { detectImageType, extensionFor, stripMetadata } from "../../lib/images.js";
 import { CITIES, findCity } from "../../lib/cities.js";
+import { MAX_PROMPT_ANSWER, MAX_PROMPTS, PROMPTS, promptText } from "../../lib/prompts.js";
 import { roundCoord } from "../../lib/geo.js";
 import { isBlockedBetween } from "../../lib/safety.js";
 import { ageFrom } from "../../lib/age.js";
@@ -54,6 +55,7 @@ async function ownProfile(userId: string) {
     include: {
       profile: true,
       photos: { orderBy: { position: "asc" } },
+      prompts: { orderBy: { position: "asc" } },
       preferences: true,
       interests: { include: { interest: true } },
     },
@@ -77,7 +79,9 @@ async function ownProfile(userId: string) {
     isPublished: p?.isPublished ?? false,
     isDiscoverable: p?.isDiscoverable ?? true,
     discoveryPaused: !!p?.discoveryPausedAt,
-    photos: user.photos.map((ph) => ({ id: ph.id, position: ph.position, status: ph.status })),
+    photos: user.photos.map((ph) => ({ id: ph.id, position: ph.position, status: ph.status, focusX: ph.focusX, focusY: ph.focusY })),
+    prompts: user.prompts.filter((pr) => promptText(pr.promptKey)).map((pr) => ({ key: pr.promptKey, text: promptText(pr.promptKey)!, answer: pr.answer })),
+    dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString().slice(0, 10) : null, // own view only
   };
 }
 
@@ -203,6 +207,37 @@ profilesRouter.delete("/me/photos/:id", async (req, res) => {
   ok(res, { deleted: true });
 });
 
+/** Replaces the member's prompt answers (in display order). Unknown prompts are rejected. */
+profilesRouter.put("/me/prompts", async (req, res) => {
+  const userId = req.user!.id;
+  const { prompts } = parse(
+    z.object({
+      prompts: z
+        .array(z.object({ key: z.string().max(40), answer: z.string().trim().min(1, "Write a few words, or remove this prompt.").max(MAX_PROMPT_ANSWER) }))
+        .max(MAX_PROMPTS, `Choose up to ${MAX_PROMPTS} prompts.`),
+    }),
+    req.body,
+  );
+  const keys = prompts.map((p) => p.key);
+  if (new Set(keys).size !== keys.length) throw badRequest("Each prompt can only be answered once.");
+  if (keys.some((k) => !promptText(k))) throw badRequest("One or more prompts aren't recognised.");
+  await prisma.$transaction([
+    prisma.profilePrompt.deleteMany({ where: { userId } }),
+    prisma.profilePrompt.createMany({ data: prompts.map((p, position) => ({ userId, promptKey: p.key, answer: cleanPrompt(p.answer), position })) }),
+  ]);
+  ok(res, await ownProfile(userId));
+});
+
+/** Non-destructive framing: stores the focal point used when the photo is cropped. */
+profilesRouter.patch("/me/photos/:id", async (req, res) => {
+  const userId = req.user!.id;
+  const { id } = parse(z.object({ id: z.string().uuid() }), req.params);
+  const body = parse(z.object({ focusX: z.number().int().min(0).max(100), focusY: z.number().int().min(0).max(100) }), req.body);
+  const { count } = await prisma.profilePhoto.updateMany({ where: { id, userId }, data: body });
+  if (!count) throw notFound("Photo not found.");
+  ok(res, { id, ...body });
+});
+
 profilesRouter.put("/me/photos/order", async (req, res) => {
   const userId = req.user!.id;
   const { ids } = parse(z.object({ ids: z.array(z.string().uuid()).max(MAX_PHOTOS) }), req.body);
@@ -228,7 +263,11 @@ profilesRouter.get("/:userId", requireActive, async (req, res) => {
   ok(res, { ...toPublicProfile(user, viewer, { showDistance: settings?.showDistance }), compatibility });
 });
 
+// eslint-disable-next-line no-control-regex
+const cleanPrompt = (t: string) => t.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
+
 export const metaRouter = Router();
+metaRouter.get("/prompts", (_req, res) => ok(res, PROMPTS));
 metaRouter.get("/interests", async (_req, res) => {
   const interests = await prisma.interest.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] });
   ok(res, interests.map(({ slug, name, category }) => ({ slug, name, category })));

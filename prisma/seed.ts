@@ -7,6 +7,7 @@ import { PrismaClient, type Gender, type Intention } from "@prisma/client";
 import argon2 from "argon2";
 import { randomBytes } from "node:crypto";
 import { seedReference } from "./seed-data/loadReference.js";
+import { DEMO_PROMPTS } from "./seed-data/demoStories.js";
 
 const prisma = new PrismaClient();
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -190,11 +191,28 @@ async function seedDev() {
   console.log(`  dev: ${MEMBERS.length} members + admin, moderator, expert, applicant (password: ${DEV_PASSWORD})`);
 }
 
+/** Marks demo accounts and gives them prompt answers. Safe to re-run; never touches non-demo users. */
+async function seedDemoStories() {
+  let n = 0;
+  for (const [email, prompts] of Object.entries(DEMO_PROMPTS)) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) continue;
+    await prisma.user.update({ where: { id: user.id }, data: { isDemo: true } });
+    if (await prisma.profilePrompt.count({ where: { userId: user.id } })) continue;
+    await prisma.profilePrompt.createMany({ data: prompts.map(([promptKey, answer], position) => ({ userId: user.id, promptKey, answer, position })) });
+    n++;
+  }
+  console.log(`  demo stories: prompts added for ${n} demo member(s)`);
+}
+
 async function main() {
   console.log("Seeding Knot…");
   await seedReference(prisma);
   if (process.env.NODE_ENV === "production") console.log("  NODE_ENV=production: skipping development members");
-  else await seedDev();
+  else {
+    await seedDev();
+    await seedDemoStories();
+  }
 }
 
 main()

@@ -196,6 +196,7 @@ model User {
   onboardedAt         DateTime?
   lastActiveAt        DateTime?
   deletionRequestedAt DateTime?
+  isDemo              Boolean       @default(false) // development/demo seed accounts, always labelled in the UI
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 
@@ -206,6 +207,7 @@ model User {
   photos             ProfilePhoto[]
   preferences        RelationshipPreference[]
   interests          UserInterest[]
+  prompts            ProfilePrompt[]
   answers            CompatibilityAnswer[]
   likesSent          Like[]                   @relation("LikeFrom")
   likesReceived      Like[]                   @relation("LikeTo")
@@ -308,10 +310,28 @@ model ProfilePhoto {
   mimeType   String
   sizeBytes  Int
   position   Int
+  // Non-destructive framing: the point (0–100 %) kept in view when the photo is cropped.
+  focusX     Int         @default(50)
+  focusY     Int         @default(50)
   status     PhotoStatus @default(APPROVED)
   createdAt  DateTime    @default(now())
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, position])
+}
+
+// Answers to curated profile prompts ("My ideal Sunday looks like…"). Keys are validated against the catalogue in code.
+model ProfilePrompt {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  promptKey String
+  answer    String
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, promptKey])
   @@index([userId, position])
 }
 
@@ -397,6 +417,10 @@ model Like {
   id         String   @id @default(uuid()) @db.Uuid
   fromUserId String   @db.Uuid
   toUserId   String   @db.Uuid
+  // "Start with a detail": the profile detail this like responds to, and an optional note.
+  detailKind String? // PROMPT | INTEREST
+  detailRef  String?
+  comment    String?
   createdAt  DateTime @default(now())
   from       User     @relation("LikeFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
   to         User     @relation("LikeTo", fields: [toUserId], references: [id], onDelete: Cascade)
