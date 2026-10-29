@@ -91,3 +91,16 @@ describe("likes and matches", () => {
     expect((await (await loginAs(c)).delete(`/api/matches/${matchId}`)).status).toBe(404);
   });
 });
+
+describe("who can like", () => {
+  it("requires the liker to have a published profile (no likes from half-created accounts)", async () => {
+    const target = await createUser({ name: "Target" });
+    const draft = await createUser({ name: "Draft", published: false });
+    const s = await loginAs(draft);
+    const res = await s.post("/api/likes", { userId: target.id });
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toMatch(/Publish your profile/);
+    expect((await s.post("/api/likes/pass", { userId: target.id })).status).toBe(400);
+    expect(await prisma.like.count({ where: { fromUserId: draft.id } })).toBe(0);
+  });
+});

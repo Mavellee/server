@@ -116,6 +116,14 @@ describe("request protections", () => {
     expect(last).toBe(429);
   });
 
+  it("locks out guessing on one account without locking out other people on the same network", async () => {
+    const neighbour = await createUser();
+    const attempt = (email: string, password: string) => request(app).post("/api/auth/login").set("Origin", ORIGIN).set("x-test-rate-limit", "on").send({ email, password });
+    for (let i = 0; i < 10; i++) await attempt("guessed@knot.test", "WrongPass99");
+    expect((await attempt("guessed@knot.test", "WrongPass99")).status).toBe(429);
+    expect((await attempt(neighbour.email, PASSWORD)).status).toBe(200); // same IP, different account
+  });
+
   it("returns consistent JSON errors for unknown routes and malformed JSON", async () => {
     const notFound = await anon().get("/api/does-not-exist");
     expect(notFound.status).toBe(404);

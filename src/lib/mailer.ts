@@ -12,12 +12,18 @@ export interface Mailer {
   send(mail: Mail): Promise<void>;
 }
 
-/** Development: prints the email (including links) to the server log instead of sending it. */
-class ConsoleMailer implements Mailer {
+/**
+ * Used when SMTP isn't configured. In development it prints the email (including links) to the log.
+ * In production it never logs the body — verification and reset links are live account tokens — and
+ * reports that nothing was sent. Tests keep an in-memory outbox; nothing is retained otherwise.
+ */
+export class ConsoleMailer implements Mailer {
   public outbox: Mail[] = [];
+  constructor(private mode: "development" | "test" | "production" = config.isTest ? "test" : config.isProd ? "production" : "development") {}
   async send(mail: Mail) {
-    this.outbox.push(mail);
-    if (!config.isTest) logger.info({ to: mail.to, subject: mail.subject }, `\n--- DEV EMAIL ---\n${mail.text}\n-----------------`);
+    if (this.mode === "test") return void this.outbox.push(mail);
+    if (this.mode === "production") return void logger.error({ subject: mail.subject }, "Email NOT sent: SMTP is not configured (SMTP_HOST is empty)");
+    logger.info({ to: mail.to, subject: mail.subject }, `\n--- DEV EMAIL ---\n${mail.text}\n-----------------`);
   }
 }
 
@@ -34,3 +40,7 @@ class SmtpMailer implements Mailer {
 }
 
 export const mailer: Mailer = config.mail.host ? new SmtpMailer() : new ConsoleMailer();
+
+if (config.isProd && !config.mail.host) {
+  logger.error("SMTP_HOST is not set: verification and password-reset emails will NOT be sent. Configure SMTP before inviting members.");
+}

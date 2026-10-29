@@ -39,8 +39,17 @@ const limiter = (opts: Partial<Options>) =>
     ...opts,
   });
 
-export const authLimiter = limiter({ windowMs: 15 * 60 * 1000, limit: 20, keyGenerator: (req) => req.ip ?? "unknown" });
+// Per network: generous, so people sharing an office or campus connection don't lock each other out.
+export const authLimiter = limiter({ windowMs: 15 * 60 * 1000, limit: 100, keyGenerator: (req) => req.ip ?? "unknown" });
+// Per account and network: password guessing against one email stays slow.
+export const accountLimiter = limiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  keyGenerator: (req) => `${req.ip ?? "unknown"}|${String(req.body?.email ?? "").trim().toLowerCase().slice(0, 254)}`,
+});
 export const sensitiveLimiter = limiter({ windowMs: 60 * 60 * 1000, limit: 10 });
 export const apiLimiter = limiter({ windowMs: 60 * 1000, limit: 300 });
 export const messageLimiter = limiter({ windowMs: 60 * 1000, limit: 30 });
 export const reportLimiter = limiter({ windowMs: 60 * 60 * 1000, limit: 20 });
+// Photo/video uploads and replacements; checked before any file data is read.
+export const uploadLimiter = limiter({ windowMs: 10 * 60 * 1000, limit: 30 });

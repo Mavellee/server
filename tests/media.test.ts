@@ -222,3 +222,12 @@ describe("liking a specific photo or video", () => {
     expect((await (await loginAs(a)).post("/api/likes", { userId: b.id, detail: { kind: "MEDIA", ref: item.id } })).status).toBe(400);
   });
 });
+
+describe("upload abuse", () => {
+  it("rate-limits uploads per member before reading any file data", async () => {
+    const { s } = await freshMember();
+    let last = 0;
+    for (let i = 0; i < 31; i++) last = (await s.agent.post("/api/profiles/me/photos").set("Origin", ORIGIN).set("x-test-rate-limit", "on")).status;
+    expect(last).toBe(429);
+  });
+});

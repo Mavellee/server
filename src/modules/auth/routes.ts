@@ -4,7 +4,7 @@ import { prisma } from "../../db.js";
 import { ApiError, badRequest, ok, parse, unauthorized } from "../../lib/http.js";
 import { ageFrom } from "../../lib/age.js";
 import { requireAuth } from "../../middleware/auth.js";
-import { authLimiter, sensitiveLimiter } from "../../middleware/security.js";
+import { accountLimiter, authLimiter, sensitiveLimiter } from "../../middleware/security.js";
 import {
   accountView,
   clearSessionCookie,
@@ -64,7 +64,7 @@ authRouter.post("/register", authLimiter, async (req, res) => {
   ok(res, await accountView(user.id), 201);
 });
 
-authRouter.post("/login", authLimiter, async (req, res) => {
+authRouter.post("/login", authLimiter, accountLimiter, async (req, res) => {
   const body = parse(z.object({ email, password: z.string().min(1).max(128) }), req.body);
   const user = await prisma.user.findUnique({ where: { email: body.email } });
   const valid = await verifyPassword(user?.passwordHash ?? null, body.password);
@@ -107,7 +107,7 @@ authRouter.post("/resend-verification", requireAuth, sensitiveLimiter, async (re
   ok(res, { sent: true });
 });
 
-authRouter.post("/forgot-password", authLimiter, async (req, res) => {
+authRouter.post("/forgot-password", authLimiter, accountLimiter, async (req, res) => {
   const body = parse(z.object({ email }), req.body);
   const user = await prisma.user.findUnique({ where: { email: body.email } });
   if (user && user.status !== "BANNED") await sendPasswordResetEmail(user.id, user.email);

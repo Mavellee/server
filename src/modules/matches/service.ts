@@ -11,6 +11,9 @@ import { cancelLiveGamesForConversation } from "../chatgames/service.js";
 /** Can `fromId` act on `toId` at all (like, pass, view)? */
 async function assertActionable(fromId: string, toId: string) {
   if (fromId === toId) throw badRequest("You can't like your own profile.");
+  // Likes and passes come from members others can see back: an unpublished profile can't act.
+  const me = await prisma.profile.findUnique({ where: { userId: fromId }, select: { isPublished: true } });
+  if (!me?.isPublished) throw badRequest("Publish your profile before liking or passing on people.");
   const target = await prisma.user.findFirst({
     where: { id: toId, status: "ACTIVE", profile: { isPublished: true } },
     select: { id: true },

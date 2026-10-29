@@ -294,6 +294,7 @@ export const answer = (userId: string, conversationId: string, sessionId: string
     if (input.roundIndex !== s.currentIndex) throw new ApiError(409, "STALE_ROUND", "That round has moved on. Refresh to see the current card.");
     assertCanAnswer(s.status, round);
     if (round!.answers.some((a) => a.userId === userId)) throw conflict("You've already answered this round.");
+    const now = new Date();
 
     let choice: string | null = null;
     let text: string | null = null;
@@ -307,7 +308,8 @@ export const answer = (userId: string, conversationId: string, sessionId: string
       if (text.length > MAX_TEXT) throw badRequest(`Answers can be up to ${MAX_TEXT} characters.`);
     }
     try {
-      await tx.gameRoundAnswer.create({ data: { roundId: round!.id, userId, choice, text } });
+      // One clock for submission and reveal times, so a reveal is never recorded before the answer that caused it.
+      await tx.gameRoundAnswer.create({ data: { roundId: round!.id, userId, choice, text, createdAt: now } });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") throw conflict("You've already answered this round.");
       throw e;
@@ -315,7 +317,7 @@ export const answer = (userId: string, conversationId: string, sessionId: string
     // Reveal only once every participant has responded.
     if (round!.answers.length + 1 >= s.participants.length) {
       assertRoundTransition(round!.status, "REVEALED");
-      await tx.gameRound.update({ where: { id: round!.id }, data: { status: "REVEALED", revealedAt: new Date() } });
+      await tx.gameRound.update({ where: { id: round!.id }, data: { status: "REVEALED", revealedAt: now } });
     }
   });
 

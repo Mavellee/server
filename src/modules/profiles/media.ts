@@ -12,6 +12,7 @@ import { detectImageType, extensionFor, stripMetadata } from "../../lib/images.j
 import { extensionForVideo, inspectAndScrub } from "../../lib/video.js";
 import { isBlockedBetween } from "../../lib/safety.js";
 import { requireAuth } from "../../middleware/auth.js";
+import { uploadLimiter } from "../../middleware/security.js";
 
 /**
  * Profile media: photos and short videos in one ordered gallery.
@@ -107,7 +108,7 @@ export const mediaLimits = { maxPhotos: limits.maxPhotos, maxVideos: limits.maxV
 
 export const ownMediaRouter = Router();
 
-ownMediaRouter.post("/photos", upload.fields([{ name: "photo", maxCount: 1 }]), async (req, res) => {
+ownMediaRouter.post("/photos", uploadLimiter, upload.fields([{ name: "photo", maxCount: 1 }]), async (req, res) => {
   const userId = req.user!.id;
   try {
     const file = filesOf(req).photo?.[0];
@@ -126,7 +127,7 @@ ownMediaRouter.post("/photos", upload.fields([{ name: "photo", maxCount: 1 }]), 
   }
 });
 
-ownMediaRouter.post("/videos", upload.fields([{ name: "video", maxCount: 1 }, { name: "poster", maxCount: 1 }]), async (req, res) => {
+ownMediaRouter.post("/videos", uploadLimiter, upload.fields([{ name: "video", maxCount: 1 }, { name: "poster", maxCount: 1 }]), async (req, res) => {
   const userId = req.user!.id;
   try {
     const video = filesOf(req).video?.[0];
@@ -149,7 +150,7 @@ ownMediaRouter.post("/videos", upload.fields([{ name: "video", maxCount: 1 }, { 
 });
 
 /** Swaps the file behind an item, keeping its caption, position and primary status. Old files are removed. */
-ownMediaRouter.post("/photos/:id/replace", upload.fields([{ name: "photo", maxCount: 1 }, { name: "video", maxCount: 1 }, { name: "poster", maxCount: 1 }]), async (req, res) => {
+ownMediaRouter.post("/photos/:id/replace", uploadLimiter, upload.fields([{ name: "photo", maxCount: 1 }, { name: "video", maxCount: 1 }, { name: "poster", maxCount: 1 }]), async (req, res) => {
   const userId = req.user!.id;
   try {
     const { id } = parse(z.object({ id: z.string().uuid() }), req.params);
