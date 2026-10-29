@@ -576,16 +576,21 @@ model Game {
 }
 
 model GameQuestion {
-  id        String       @id @default(uuid()) @db.Uuid
-  gameId    String       @db.Uuid
-  prompt    String
-  options   Json? // e.g. ["Red flag", "Green flag"] or ["A", "B"]
-  sortOrder Int          @default(0)
-  isActive  Boolean      @default(true)
-  game      Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  answers   GameAnswer[]
-  rounds    GameRound[]
+  id         String       @id @default(uuid()) @db.Uuid
+  gameId     String       @db.Uuid
+  prompt     String
+  options    Json? // e.g. ["Red Flag", "Green Flag", "It Depends"] or ["A", "B"]
+  sortOrder  Int          @default(0)
+  isActive   Boolean      @default(true)
+  // Keyed scenarios are upserted by key, so rewording one never changes the prompt shown beside past answers.
+  key        String?
+  theme      String? // e.g. "Jealousy and trust"; rounds are spread across themes
+  discussion String? // neutral follow-up shown after the reveal
+  game       Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answers    GameAnswer[]
+  rounds     GameRound[]
 
+  @@unique([gameId, key])
   @@index([gameId, sortOrder])
 }
 

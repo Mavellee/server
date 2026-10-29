@@ -1,5 +1,6 @@
 // Reference data loaded in every environment (idempotent upserts).
 import type { CompatibilityDimension, GameCategory } from "@prisma/client";
+import { FLAG_OPTIONS, FLAG_SCENARIOS, type Scenario } from "./redFlagScenarios.js";
 
 export const INTERESTS: { slug: string; name: string; category: string }[] = [
   // Music
@@ -75,29 +76,16 @@ export const QUESTIONS: Q[] = [
   { key: "ambition", dimension: "VALUES", prompt: "Right now, your career is…", options: [["priority", "A top priority"], ["balance", "Important, but balanced with life"], ["flexible", "Flexible — life comes first"]] },
 ];
 
-type Q2 = string | { prompt: string; options: string[] };
+type Q2 = string | { prompt: string; options: string[] } | Scenario;
 type G = { slug: string; category: GameCategory; name: string; description: string; options?: string[]; questions: Q2[] };
 export const GAMES: G[] = [
   {
     slug: "red-flag-green-flag",
     category: "RED_FLAG_GREEN_FLAG",
     name: "Red Flag or Green Flag?",
-    description: "Quick calls on everyday dating moments. Compare instincts, then say why.",
-    options: ["Green flag", "Yellow flag", "Red flag"],
-    questions: [
-      "They remember a small detail you mentioned weeks ago.",
-      "They check their phone throughout dinner.",
-      "They're still close friends with an ex.",
-      "They say \"let's see where this goes\" after three months.",
-      "They apologise first after a disagreement.",
-      "They've never been in a relationship longer than a year.",
-      "They ask what your boundaries are early on.",
-      "They want to share phone passwords in the first month.",
-      "They're kind to waiting staff.",
-      "They plan the whole first date without asking what you like.",
-      "They talk about future plans on the second date.",
-      "They're comfortable sitting in silence with you.",
-    ],
+    description: "Five real-life relationship moments. Make your call privately, then see if you agree — and talk about why.",
+    options: FLAG_OPTIONS,
+    questions: FLAG_SCENARIOS,
   },
   {
     slug: "know-each-other",

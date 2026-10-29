@@ -53,7 +53,7 @@ describe("starting and joining a game in a conversation", () => {
     const after = (await g.sb.post(g.url("/join"))).body.data;
     expect(after.status).toBe("ACTIVE");
     expect(after.round.index).toBe(0);
-    expect(after.round.options).toEqual(["Green flag", "Yellow flag", "Red flag"]);
+    expect(after.round.options).toEqual(["Red Flag", "Green Flag", "It Depends"]);
     // Joining again (e.g. after a refresh) is harmless.
     expect((await g.sb.post(g.url("/join"))).status).toBe(200);
   });
@@ -77,22 +77,22 @@ describe("starting and joining a game in a conversation", () => {
 describe("private answers and reveal", () => {
   it("hides the partner's answer until both have answered, then shows both the same result", async () => {
     const g = await started("red-flag-green-flag");
-    const afterA = (await g.sa.post(g.url("/answer"), { roundIndex: 0, choice: "Red flag" })).body.data;
+    const afterA = (await g.sa.post(g.url("/answer"), { roundIndex: 0, choice: "Red Flag" })).body.data;
     expect(afterA.round.status).toBe("OPEN");
-    expect(afterA.round.you.answer.choice).toBe("Red flag");
+    expect(afterA.round.you.answer.choice).toBe("Red Flag");
 
     const bSees = await view(g.sb, g.url());
     expect(bSees.round.partner.answered).toBe(true);
     expect(bSees.round.partner.answer).toBeNull();
-    expect(JSON.stringify(bSees)).not.toContain('"choice":"Red flag"');
-    expect(JSON.stringify(await g.sb.get(base(g.conversationId)))).not.toContain('"choice":"Red flag"');
+    expect(JSON.stringify(bSees)).not.toContain('"choice":"Red Flag"');
+    expect(JSON.stringify(await g.sb.get(base(g.conversationId)))).not.toContain('"choice":"Red Flag"');
 
-    const afterB = (await g.sb.post(g.url("/answer"), { roundIndex: 0, choice: "Red flag" })).body.data;
+    const afterB = (await g.sb.post(g.url("/answer"), { roundIndex: 0, choice: "Red Flag" })).body.data;
     expect(afterB.round.status).toBe("REVEALED");
-    expect(afterB.round.partner.answer.choice).toBe("Red flag");
+    expect(afterB.round.partner.answer.choice).toBe("Red Flag");
     expect(afterB.round.agreed).toBe(true);
     const aSees = await view(g.sa, g.url());
-    expect(aSees.round.partner.answer.choice).toBe("Red flag");
+    expect(aSees.round.partner.answer.choice).toBe("Red Flag");
     expect(aSees.summary.agreements).toBe(1);
   });
 
@@ -119,16 +119,18 @@ describe("private answers and reveal", () => {
     expect(await prisma.gameRoundAnswer.count({ where: { roundId: round.id } })).toBe(2);
   });
 
-  it("lets a player pass on a card without penalty, and either player skip the whole card", async () => {
-    const g = await started("fun-challenges");
-    await g.sa.post(g.url("/answer"), { roundIndex: 0, skip: true });
-    const r0 = (await g.sb.post(g.url("/answer"), { roundIndex: 0, text: "Kind, curious, funny" })).body.data;
-    expect(r0.round.status).toBe("REVEALED");
-    expect(r0.round.partner.answer.skipped).toBe(true);
-    await g.sa.post(g.url("/next"), { roundIndex: 0 });
-    const skipped = (await g.sb.post(g.url("/skip"), { roundIndex: 1 })).body.data;
-    expect(skipped.currentRound).toBe(2);
-    expect(skipped.history.map((h: { status: string }) => h.status)).toEqual(["REVEALED", "SKIPPED"]);
+  it("skips a card for both players without ever revealing an answer already given to it", async () => {
+    const g = await started("red-flag-green-flag");
+    await g.sa.post(g.url("/answer"), { roundIndex: 0, choice: "Red Flag" });
+    // Per-player "passes" are not accepted: they would let one player trigger a reveal without answering.
+    expect((await g.sb.post(g.url("/answer"), { roundIndex: 0, skip: true })).status).toBe(422);
+    const skipped = (await g.sb.post(g.url("/skip"), { roundIndex: 0 })).body.data;
+    expect(skipped.currentRound).toBe(1);
+    expect(skipped.history[0]).toMatchObject({ status: "SKIPPED", partner: { answered: true, answer: null }, discussion: null });
+    expect(JSON.stringify(skipped)).not.toContain("\"choice\":\"Red Flag\"");
+    expect(JSON.stringify((await g.sb.get(base(g.conversationId))).body)).not.toContain("\"choice\":\"Red Flag\"");
+    // The skipper cannot skip a card that has already moved on.
+    expect((await g.sb.post(g.url("/skip"), { roundIndex: 0 })).status).toBe(409);
   });
 });
 
@@ -137,8 +139,8 @@ describe("rounds, notes and completion", () => {
     const g = await started("red-flag-green-flag");
     const total = (await view(g.sa, g.url())).totalRounds;
     for (let i = 0; i < total; i++) {
-      await g.sa.post(g.url("/answer"), { roundIndex: i, choice: "Green flag" });
-      await g.sb.post(g.url("/answer"), { roundIndex: i, choice: i === 0 ? "Red flag" : "Green flag" });
+      await g.sa.post(g.url("/answer"), { roundIndex: i, choice: "Green Flag" });
+      await g.sb.post(g.url("/answer"), { roundIndex: i, choice: i === 0 ? "Red Flag" : "Green Flag" });
       if (i === 0) {
         expect((await g.sa.post(g.url("/note"), { roundIndex: 0, note: "Remembering details is care." })).status).toBe(200);
         const bView = await view(g.sb, g.url());
@@ -154,7 +156,7 @@ describe("rounds, notes and completion", () => {
     const summaryCard = await prisma.message.findFirstOrThrow({ where: { gameSessionId: g.id, senderId: null } });
     expect(summaryCard.metadata).toMatchObject({ event: "completed", agreements: total - 1 });
     // A completed game accepts nothing more.
-    expect((await g.sa.post(g.url("/answer"), { roundIndex: total - 1, choice: "Green flag" })).status).toBe(409);
+    expect((await g.sa.post(g.url("/answer"), { roundIndex: total - 1, choice: "Green Flag" })).status).toBe(409);
     expect((await g.sa.post(g.url("/resume"))).status).toBe(409);
   });
 

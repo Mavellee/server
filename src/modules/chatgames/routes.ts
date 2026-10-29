@@ -34,7 +34,8 @@ chatGamesRouter.post("/:sessionId/join", async (req, res) => {
 
 chatGamesRouter.post("/:sessionId/answer", messageLimiter, async (req, res) => {
   const { id, sessionId } = ids(req.params);
-  const body = parse(roundBody.extend({ choice: z.string().max(120).optional(), text: z.string().max(600).optional(), skip: z.boolean().optional() }), req.body);
+  // Strict: a "skip" here is rejected; skipping is the round-level /skip action.
+  const body = parse(roundBody.extend({ choice: z.string().max(120).optional(), text: z.string().max(600).optional() }).strict(), req.body);
   ok(res, await games.answer(req.user!.id, id, sessionId, body));
 });
 

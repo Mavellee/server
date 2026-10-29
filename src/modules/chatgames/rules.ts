@@ -4,7 +4,7 @@ import type { GameCategory } from "@prisma/client";
  * How each deck plays inside a conversation. Content (questions/options) lives in PostgreSQL;
  * these rules describe the mechanics. Bump RULES_VERSION when mechanics change.
  */
-export const RULES_VERSION = 1;
+export const RULES_VERSION = 2; // 2: skipping is round-level only (no per-player passes)
 
 export type Mode = "simultaneous" | "guess";
 export type AnswerType = "choice" | "text";

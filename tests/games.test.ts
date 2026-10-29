@@ -16,11 +16,10 @@ describe("couple games", () => {
     let state = (await s.post("/api/games/sessions", { gameSlug: "red-flag-green-flag", questionCount: 3 })).body.data;
     expect(state.progress).toEqual({ index: 0, total: 3 });
     expect((await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "Maybe?" })).status).toBe(400);
-    // Red Flag decks now include a yellow flag.
-    state = (await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "Green flag" })).body.data;
+    state = (await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "Green Flag" })).body.data;
     expect(state.progress.index).toBe(1);
     state = (await s.post(`/api/games/sessions/${state.id}/skip`)).body.data;
-    state = (await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "Yellow flag" })).body.data;
+    state = (await s.post(`/api/games/sessions/${state.id}/answer`, { answer: "It Depends" })).body.data;
     expect(state.status).toBe("COMPLETED");
     expect(state.recap).toHaveLength(3);
     expect(state.recap[1].skipped).toBe(true);

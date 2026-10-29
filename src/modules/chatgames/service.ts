@@ -51,6 +51,9 @@ function roundView(r: FullSession["rounds"][number], viewerId: string, partnerId
     index: r.index,
     status: r.status,
     prompt: r.question.prompt,
+    theme: r.question.theme,
+    // A neutral conversation starter, shown only once both answers are revealed.
+    discussion: revealed ? r.question.discussion : null,
     options: rules.answer === "choice" ? ((r.question.options as string[] | null) ?? []) : null,
     subjectUserId: r.subjectUserId,
     you: { answered: !!mine, answer: answer(mine) ?? null },
@@ -127,13 +130,23 @@ async function postTimelineCard(tx: Tx, s: { id: string; conversationId: string 
   return m;
 }
 
-function pickQuestions(ids: string[], n: number) {
-  const a = [...ids];
+function shuffle<T>(list: T[]) {
+  const a = [...list];
   for (let i = a.length - 1; i > 0; i--) {
     const j = randomInt(i + 1);
     [a[i], a[j]] = [a[j], a[i]];
   }
-  return a.slice(0, n);
+  return a;
+}
+
+/** Random questions, spread across as many different themes as possible (one per theme before any repeats). */
+export function pickQuestions(questions: { id: string; theme?: string | null }[], n: number) {
+  const byTheme = new Map<string, string[]>();
+  for (const q of shuffle(questions)) byTheme.set(q.theme ?? "", [...(byTheme.get(q.theme ?? "") ?? []), q.id]);
+  const groups = shuffle([...byTheme.values()]);
+  const picked: string[] = [];
+  while (picked.length < n && groups.some((g) => g.length)) for (const g of groups) if (g.length && picked.length < n) picked.push(g.shift()!);
+  return picked;
 }
 
 // ---------- queries ----------
@@ -144,6 +157,8 @@ export async function catalog() {
     include: { questions: { where: { isActive: true }, orderBy: { sortOrder: "asc" }, take: 1 }, _count: { select: { questions: { where: { isActive: true } } } } },
     orderBy: { name: "asc" },
   });
+  // Red Flag or Green Flag is the featured in-chat game, so it leads the selector.
+  games.sort((a, b) => Number(b.category === "RED_FLAG_GREEN_FLAG") - Number(a.category === "RED_FLAG_GREEN_FLAG"));
   return games.map((g) => {
     const r = GAME_RULES[g.category];
     const sample = g.questions[0];
@@ -182,7 +197,7 @@ export async function getView(userId: string, conversationId: string, sessionId:
 
 export async function startGame(userId: string, conversationId: string, gameSlug: string) {
   const { otherId } = await assertMember(userId, conversationId);
-  const game = await prisma.game.findFirst({ where: { slug: gameSlug, isActive: true }, include: { questions: { where: { isActive: true }, select: { id: true } } } });
+  const game = await prisma.game.findFirst({ where: { slug: gameSlug, isActive: true }, include: { questions: { where: { isActive: true }, select: { id: true, theme: true } } } });
   if (!game) throw notFound("Game not found.");
   const rules = GAME_RULES[game.category];
   if (game.questions.length < 1) throw badRequest("This game has no questions yet.");
@@ -202,7 +217,7 @@ export async function startGame(userId: string, conversationId: string, gameSlug
           status: "WAITING",
           rulesVersion: RULES_VERSION,
           config: { rounds, mode: rules.mode, answer: rules.answer },
-          questionIds: pickQuestions(game.questions.map((q) => q.id), rounds),
+          questionIds: pickQuestions(game.questions, rounds),
           participants: { create: [{ userId, joinedAt: new Date() }, { userId: otherId }] },
         },
       });
@@ -272,7 +287,7 @@ export const join = (userId: string, conversationId: string, sessionId: string) 
     await openRound(tx, s, 0);
   });
 
-export const answer = (userId: string, conversationId: string, sessionId: string, input: { roundIndex: number; choice?: string; text?: string; skip?: boolean }) =>
+export const answer = (userId: string, conversationId: string, sessionId: string, input: { roundIndex: number; choice?: string; text?: string }) =>
   command(userId, conversationId, sessionId, async (tx, s) => {
     const rules = rulesOf(s);
     const round = s.rounds.find((r) => r.index === s.currentIndex) ?? null;
@@ -282,19 +297,17 @@ export const answer = (userId: string, conversationId: string, sessionId: string
 
     let choice: string | null = null;
     let text: string | null = null;
-    if (!input.skip) {
-      if (rules.answer === "choice") {
-        const options = (round!.question.options as string[] | null) ?? [];
-        if (!input.choice || !options.includes(input.choice)) throw badRequest("Choose one of the options.");
-        choice = input.choice;
-      } else {
-        text = cleanText(input.text ?? "");
-        if (!text) throw badRequest("Write an answer, or skip this one.");
-        if (text.length > MAX_TEXT) throw badRequest(`Answers can be up to ${MAX_TEXT} characters.`);
-      }
+    if (rules.answer === "choice") {
+      const options = (round!.question.options as string[] | null) ?? [];
+      if (!input.choice || !options.includes(input.choice)) throw badRequest("Choose one of the options.");
+      choice = input.choice;
+    } else {
+      text = cleanText(input.text ?? "");
+      if (!text) throw badRequest("Write an answer, or skip this card.");
+      if (text.length > MAX_TEXT) throw badRequest(`Answers can be up to ${MAX_TEXT} characters.`);
     }
     try {
-      await tx.gameRoundAnswer.create({ data: { roundId: round!.id, userId, choice, text, skipped: !!input.skip } });
+      await tx.gameRoundAnswer.create({ data: { roundId: round!.id, userId, choice, text } });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") throw conflict("You've already answered this round.");
       throw e;
@@ -306,7 +319,11 @@ export const answer = (userId: string, conversationId: string, sessionId: string
     }
   });
 
-export const skipRound = (userId: string, conversationId: string, sessionId: string, roundIndex: number) =>
+/**
+ * Skip rule (server-enforced, the same for every game): either player may skip the current card while it
+ * is open. It is skipped for both of you, and any answer already given to it is never revealed.
+ */
+export const skipRound =(userId: string, conversationId: string, sessionId: string, roundIndex: number) =>
   command(userId, conversationId, sessionId, async (tx, s) => {
     if (roundIndex !== s.currentIndex) throw new ApiError(409, "STALE_ROUND", "That round has moved on.");
     const round = s.rounds.find((r) => r.index === s.currentIndex) ?? null;

@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from "@prisma/client";
 import { GAMES, INTERESTS, QUESTIONS } from "./reference.js";
+import type { Scenario } from "./redFlagScenarios.js";
 
 export async function seedReference(prisma: PrismaClient, log = console.log) {
   for (const i of INTERESTS) await prisma.interest.upsert({ where: { slug: i.slug }, create: i, update: { name: i.name, category: i.category } });
@@ -15,11 +16,22 @@ export async function seedReference(prisma: PrismaClient, log = console.log) {
       create: { slug: g.slug, category: g.category, name: g.name, description: g.description },
       update: { name: g.name, description: g.description },
     });
+    const keyed = g.questions.filter((q): q is Scenario => typeof q === "object" && "key" in q);
+    if (keyed.length) {
+      // Keyed decks: upsert by key; anything else in the deck is retired untouched, so the
+      // prompts shown beside past answers never change.
+      for (const [sortOrder, q] of keyed.entries()) {
+        const data = { prompt: q.prompt, theme: q.theme, discussion: q.discussion, options: g.options ?? Prisma.DbNull, sortOrder, isActive: true };
+        await prisma.gameQuestion.upsert({ where: { gameId_key: { gameId: game.id, key: q.key } }, create: { gameId: game.id, key: q.key, ...data }, update: data });
+      }
+      await prisma.gameQuestion.updateMany({ where: { gameId: game.id, OR: [{ key: null }, { key: { notIn: keyed.map((q) => q.key) } }] }, data: { isActive: false } });
+      continue;
+    }
     // Upsert by position so curated wording can be improved without breaking past answers.
     const existing = await prisma.gameQuestion.findMany({ where: { gameId: game.id }, orderBy: { sortOrder: "asc" } });
     for (const [sortOrder, q] of g.questions.entries()) {
       const prompt = typeof q === "string" ? q : q.prompt;
-      const options = typeof q === "string" ? (g.options ?? Prisma.DbNull) : q.options;
+      const options = typeof q === "string" || !("options" in q) ? (g.options ?? Prisma.DbNull) : q.options;
       const row = existing.find((e) => e.sortOrder === sortOrder);
       if (row) await prisma.gameQuestion.update({ where: { id: row.id }, data: { prompt, options, isActive: true } });
       else await prisma.gameQuestion.create({ data: { gameId: game.id, prompt, options, sortOrder } });
