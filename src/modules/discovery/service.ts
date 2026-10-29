@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { Intention, Prisma } from "@prisma/client";
 import { prisma } from "../../db.js";
 import { ageFrom, birthDateForAge } from "../../lib/age.js";
 import { boundingBox, distanceKm } from "../../lib/geo.js";
@@ -23,7 +23,16 @@ export async function viewerFor(userId: string): Promise<Viewer> {
  * Builds the candidate filter for a viewer. Preferences are applied in both directions:
  * I only see people who match what I asked for AND who would want to see someone like me.
  */
-export async function candidateWhere(userId: string): Promise<{ where: Prisma.UserWhereInput; me: NonNullable<Awaited<ReturnType<typeof loadMe>>> }> {
+/** Optional per-search filters. They can only narrow the member's saved preferences, never widen them. */
+export interface DiscoveryFilters {
+  intentions?: Intention[];
+  ageMin?: number;
+  ageMax?: number;
+  maxDistanceKm?: number;
+  interests?: string[];
+}
+
+export async function candidateWhere(userId: string, filters: DiscoveryFilters = {}): Promise<{ where: Prisma.UserWhereInput; me: NonNullable<Awaited<ReturnType<typeof loadMe>>>; maxDistanceKm: number | null }> {
   const me = await loadMe(userId);
   if (!me?.profile?.isPublished) throw badRequest("Publish your profile to start discovering people.");
   if (!me.dateOfBirth) throw badRequest("Your date of birth is missing.");
@@ -40,13 +49,18 @@ export async function candidateWhere(userId: string): Promise<{ where: Prisma.Us
   const exclude = new Set<string>([userId, ...blocked, ...acted.flat().map((a) => a.toUserId)]);
   // Without explicit "sought" intentions, people are matched on their own intentions.
   const soughtExplicit = me.preferences.filter((x) => x.kind === "SOUGHT").map((x) => x.intention);
-  const sought = soughtExplicit.length ? soughtExplicit : me.preferences.filter((x) => x.kind === "OWN").map((x) => x.intention);
+  const saved = soughtExplicit.length ? soughtExplicit : me.preferences.filter((x) => x.kind === "OWN").map((x) => x.intention);
+  const sought = filters.intentions?.length ? saved.filter((i) => filters.intentions!.includes(i)) : saved;
+  if (filters.intentions?.length && !sought.length) return { where: { id: { in: [] } }, me, maxDistanceKm: null };
+  const ageMin = Math.max(p.ageMin, filters.ageMin ?? 0);
+  const ageMax = Math.min(p.ageMax, filters.ageMax ?? 200);
+  const maxDistanceKm = [p.maxDistanceKm, filters.maxDistanceKm].filter((x): x is number => !!x).reduce<number | null>((a, b) => (a === null ? b : Math.min(a, b)), null);
 
   const where: Prisma.UserWhereInput = {
     id: { notIn: [...exclude] },
     status: "ACTIVE",
     // Age is filtered on date of birth so the exact date is never exposed.
-    dateOfBirth: { lte: birthDateForAge(p.ageMin), gt: birthDateForAge(p.ageMax + 1) },
+    dateOfBirth: { lte: birthDateForAge(ageMin), gt: birthDateForAge(ageMax + 1) },
     profile: {
       isPublished: true,
       isDiscoverable: true,
@@ -57,26 +71,26 @@ export async function candidateWhere(userId: string): Promise<{ where: Prisma.Us
       ageMax: { gte: myAge },
     },
     ...(sought.length ? { preferences: { some: { kind: "OWN", intention: { in: sought } } } } : {}),
+    ...(filters.interests?.length ? { interests: { some: { interest: { slug: { in: filters.interests } } } } } : {}),
   };
 
-  if (p.maxDistanceKm && p.latitude && p.longitude) {
-    const box = boundingBox(Number(p.latitude), Number(p.longitude), p.maxDistanceKm);
+  if (maxDistanceKm && p.latitude && p.longitude) {
+    const box = boundingBox(Number(p.latitude), Number(p.longitude), maxDistanceKm);
     where.profile = {
       ...(where.profile as Prisma.ProfileWhereInput),
       latitude: { gte: box.minLat, lte: box.maxLat },
       longitude: { gte: box.minLon, lte: box.maxLon },
     };
   }
-  return { where, me };
+  return { where, me, maxDistanceKm };
 }
 
 function loadMe(userId: string) {
   return prisma.user.findUnique({ where: { id: userId }, include: { profile: true, preferences: true } });
 }
 
-export async function discover(userId: string, cursor: string | undefined, limit: number) {
-  const { where, me } = await candidateWhere(userId);
-  const p = me.profile!;
+export async function discover(userId: string, cursor: string | undefined, limit: number, filters: DiscoveryFilters = {}) {
+  const { where, maxDistanceKm } = await candidateWhere(userId, filters);
   const viewer = await viewerFor(userId);
   const out: Awaited<ReturnType<typeof prisma.user.findMany<{ include: typeof publicProfileInclude }>>> = [];
   let after = cursor;
@@ -98,8 +112,8 @@ export async function discover(userId: string, cursor: string | undefined, limit
       after = u.id;
       const lat = u.profile?.latitude;
       const lon = u.profile?.longitude;
-      if (p.maxDistanceKm && viewer.lat != null && viewer.lon != null && lat && lon) {
-        if (distanceKm(viewer.lat, viewer.lon, Number(lat), Number(lon)) > p.maxDistanceKm) continue;
+      if (maxDistanceKm && viewer.lat != null && viewer.lon != null && lat && lon) {
+        if (distanceKm(viewer.lat, viewer.lon, Number(lat), Number(lon)) > maxDistanceKm) continue;
       }
       out.push(u);
       if (out.length === limit) break;

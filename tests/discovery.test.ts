@@ -78,3 +78,23 @@ describe("intention defaults", () => {
     expect(names(await (await loginAs(me)).get("/api/discovery"))).toEqual(["Commit"]);
   });
 });
+
+describe("discovery filters (query)", () => {
+  beforeEach(resetDb);
+  it("narrows by intention, age, interests and distance but never widens saved preferences", async () => {
+    const me = await createUser({ name: "Me", gender: "WOMAN", interestedIn: ["MAN"], intentions: ["SINGLE", "MARRIAGE"], ageMin: 25, ageMax: 40 });
+    await createUser({ name: "Explorer", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["SINGLE"], age: 30, interests: ["hiking"] });
+    await createUser({ name: "Committed", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["MARRIAGE"], age: 35, interests: ["coffee"] });
+    await createUser({ name: "Far", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["MARRIAGE"], age: 33, lat: 19.08, lon: 72.88 });
+    await createUser({ name: "TooYoungForMe", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["SINGLE"], age: 21 });
+    const s = await loginAs(me);
+    expect(names(await s.get("/api/discovery?intentions=MARRIAGE"))).toEqual(["Committed", "Far"]);
+    expect(names(await s.get("/api/discovery?ageMin=32"))).toEqual(["Committed", "Far"]);
+    expect(names(await s.get("/api/discovery?interests=hiking,coffee"))).toEqual(["Committed", "Explorer"]);
+    expect(names(await s.get("/api/discovery?maxDistanceKm=50"))).toEqual(["Committed", "Explorer"]);
+    // A filter cannot reach outside saved preferences.
+    expect(names(await s.get("/api/discovery?ageMin=18&ageMax=22"))).toEqual([]);
+    expect(names(await s.get("/api/discovery?intentions=SITUATIONSHIP"))).toEqual([]);
+    expect((await s.get("/api/discovery?intentions=NOPE")).status).toBe(422);
+  });
+});
