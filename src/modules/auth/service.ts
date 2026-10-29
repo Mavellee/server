@@ -107,7 +107,7 @@ export async function accountView(userId: string) {
     where: { id: userId },
     include: {
       profile: { select: { displayName: true, isPublished: true, discoveryPausedAt: true } },
-      photos: { orderBy: { position: "asc" }, take: 1, select: { id: true } },
+      photos: { where: { kind: "IMAGE" }, orderBy: [{ isPrimary: "desc" }, { position: "asc" }], take: 1, select: { id: true } },
       expertProfile: { select: { status: true } },
       settings: true,
     },

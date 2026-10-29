@@ -24,7 +24,7 @@ async function assertActionable(fromId: string, toId: string) {
  * "like back" can never be missed, and unique constraints prevent duplicates.
  */
 export interface LikeDetail {
-  kind: "PROMPT" | "INTEREST";
+  kind: "PROMPT" | "INTEREST" | "MEDIA";
   ref: string;
   comment?: string;
 }
@@ -35,6 +35,11 @@ export async function describeDetail(ownerId: string, kind: string | null, ref: 
   if (kind === "PROMPT") {
     const p = await prisma.profilePrompt.findUnique({ where: { userId_promptKey: { userId: ownerId, promptKey: ref } } });
     return p && promptText(ref) ? { kind, ref, label: promptText(ref)!, quote: p.answer } : null;
+  }
+  if (kind === "MEDIA") {
+    // Only an approved photo or video that is still on their profile.
+    const m = /^[0-9a-f-]{36}$/i.test(ref) ? await prisma.profilePhoto.findFirst({ where: { id: ref, userId: ownerId, status: "APPROVED" } }) : null;
+    return m ? { kind, ref, label: m.kind === "VIDEO" ? "Video" : "Photo", quote: m.caption ?? "", mediaKind: m.kind, mediaId: m.id } : null;
   }
   const ui = await prisma.userInterest.findFirst({ where: { userId: ownerId, interest: { slug: ref } }, include: { interest: true } });
   return ui ? { kind, ref, label: "Interest", quote: ui.interest.name } : null;

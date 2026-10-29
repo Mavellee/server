@@ -16,7 +16,7 @@ likesRouter.use(requireActive);
 likesRouter.post("/", async (req, res) => {
   const { userId, detail } = parse(
     target.extend({
-      detail: z.object({ kind: z.enum(["PROMPT", "INTEREST"]), ref: z.string().min(1).max(60), comment: z.string().max(400).optional() }).optional(),
+      detail: z.object({ kind: z.enum(["PROMPT", "INTEREST", "MEDIA"]), ref: z.string().min(1).max(60), comment: z.string().max(400).optional() }).optional(),
     }),
     req.body,
   );

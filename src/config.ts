@@ -21,6 +21,8 @@ const schema = z.object({
   TRUST_PROXY: int(0),
   UPLOAD_DIR: z.string().default("./uploads"),
   MAX_UPLOAD_MB: int(5),
+  VIDEO_MAX_MB: int(50),
+  VIDEO_MAX_SECONDS: int(30),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: int(587),
   SMTP_USER: z.string().optional(),
@@ -63,6 +65,7 @@ export const config = {
   trustProxy: env.TRUST_PROXY,
   uploadDir: env.UPLOAD_DIR,
   maxUploadBytes: env.MAX_UPLOAD_MB * 1024 * 1024,
+  media: { maxPhotos: 6, maxVideos: 2, captionMax: 200, videoMaxBytes: env.VIDEO_MAX_MB * 1024 * 1024, videoMaxSeconds: env.VIDEO_MAX_SECONDS },
   mail: {
     host: env.SMTP_HOST || undefined,
     port: env.SMTP_PORT,

@@ -303,9 +303,16 @@ model Profile {
   @@index([latitude, longitude])
 }
 
+enum MediaKind {
+  IMAGE
+  VIDEO
+}
+
+/// A profile gallery item: a photo or a short video. Files live in UPLOAD_DIR, never in the database.
 model ProfilePhoto {
   id         String      @id @default(uuid()) @db.Uuid
   userId     String      @db.Uuid
+  kind       MediaKind   @default(IMAGE)
   storageKey String      @unique
   mimeType   String
   sizeBytes  Int
@@ -313,8 +320,13 @@ model ProfilePhoto {
   // Non-destructive framing: the point (0–100 %) kept in view when the photo is cropped.
   focusX     Int         @default(50)
   focusY     Int         @default(50)
+  caption    String? // optional, max 200 characters, belongs to this item only
+  isPrimary  Boolean     @default(false) // images only; at most one per member (enforced in SQL)
+  posterKey  String?     @unique // videos: still frame shown until playback is requested
+  durationMs Int? // videos only
   status     PhotoStatus @default(APPROVED)
   createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, position])

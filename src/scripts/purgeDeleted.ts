@@ -9,14 +9,14 @@ import { DELETION_GRACE_DAYS } from "../modules/settings/routes.js";
 const cutoff = new Date(Date.now() - DELETION_GRACE_DAYS * 86400000);
 const users = await prisma.user.findMany({
   where: { status: "PENDING_DELETION", deletionRequestedAt: { lt: cutoff } },
-  select: { id: true, photos: { select: { storageKey: true } } },
+  select: { id: true, photos: { select: { storageKey: true, posterKey: true } } },
 });
 
 for (const u of users) {
   const attachments = await prisma.message.findMany({ where: { senderId: u.id, attachmentKey: { not: null } }, select: { attachmentKey: true } });
   await prisma.message.deleteMany({ where: { senderId: u.id } });
   await prisma.user.delete({ where: { id: u.id } });
-  for (const key of [...u.photos.map((p) => p.storageKey), ...attachments.map((a) => a.attachmentKey!)]) {
+  for (const key of [...u.photos.flatMap((p) => [p.storageKey, p.posterKey ?? []].flat()), ...attachments.map((a) => a.attachmentKey!)]) {
     await fs.rm(path.join(config.uploadDir, key), { force: true });
   }
   await prisma.adminAuditLog.create({ data: { action: "user.purged", targetType: "User", targetId: u.id } });

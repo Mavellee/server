@@ -55,7 +55,7 @@ describe("photo framing", () => {
     const other = await loginAs(await createUser());
     expect((await other.patch(`/api/profiles/me/photos/${photo.id}`, { focusX: 10, focusY: 10 })).status).toBe(404);
     const pub = (await other.get(`/api/profiles/${a.id}`)).body.data;
-    expect(pub.photos[0]).toEqual({ id: photo.id, focusX: 30, focusY: 20 });
+    expect(pub.photos[0]).toEqual({ id: photo.id, focusX: 30, focusY: 20, caption: null });
   });
 });
 

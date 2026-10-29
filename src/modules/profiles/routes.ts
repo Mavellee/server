@@ -1,14 +1,8 @@
 import { Router } from "express";
-import fs from "node:fs/promises";
-import path from "node:path";
-import multer from "multer";
 import { z } from "zod";
 import { Gender, Intention } from "@prisma/client";
 import { prisma } from "../../db.js";
-import { config } from "../../config.js";
 import { ApiError, badRequest, notFound, ok, parse } from "../../lib/http.js";
-import { randomToken } from "../../lib/crypto.js";
-import { detectImageType, extensionFor, stripMetadata } from "../../lib/images.js";
 import { CITIES, findCity } from "../../lib/cities.js";
 import { MAX_PROMPT_ANSWER, MAX_PROMPTS, PROMPTS, promptText } from "../../lib/prompts.js";
 import { roundCoord } from "../../lib/geo.js";
@@ -16,11 +10,12 @@ import { isBlockedBetween } from "../../lib/safety.js";
 import { ageFrom } from "../../lib/age.js";
 import { requireActive, requireAuth } from "../../middleware/auth.js";
 import { publicProfileInclude, toPublicProfile } from "./serialize.js";
+import { mediaLimits, ownMediaRouter, ownMediaView } from "./media.js";
+
+export { photosRouter } from "./media.js";
 import { viewerFor } from "../discovery/service.js";
 import { compatibilityFor } from "../compatibility/service.js";
 
-export const MAX_PHOTOS = 6;
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: config.maxUploadBytes, files: 1 } });
 
 const intentionList = z.array(z.nativeEnum(Intention)).max(3);
 const profileSchema = z
@@ -48,6 +43,7 @@ const profileSchema = z
 
 export const profilesRouter = Router();
 profilesRouter.use(requireAuth);
+profilesRouter.use("/me", ownMediaRouter);
 
 async function ownProfile(userId: string) {
   const user = await prisma.user.findUniqueOrThrow({
@@ -79,7 +75,10 @@ async function ownProfile(userId: string) {
     isPublished: p?.isPublished ?? false,
     isDiscoverable: p?.isDiscoverable ?? true,
     discoveryPaused: !!p?.discoveryPausedAt,
-    photos: user.photos.map((ph) => ({ id: ph.id, position: ph.position, status: ph.status, focusX: ph.focusX, focusY: ph.focusY })),
+    // `photos` lists images only (primary first); `media` is the whole gallery in the member's chosen order.
+    photos: [...user.photos.filter((m) => m.kind === "IMAGE")].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.position - b.position).map(ownMediaView),
+    media: user.photos.map(ownMediaView),
+    mediaLimits,
     prompts: user.prompts.filter((pr) => promptText(pr.promptKey)).map((pr) => ({ key: pr.promptKey, text: promptText(pr.promptKey)!, answer: pr.answer })),
     dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString().slice(0, 10) : null, // own view only
   };
@@ -171,42 +170,6 @@ profilesRouter.post("/me/publish", async (req, res) => {
   ok(res, await ownProfile(userId));
 });
 
-profilesRouter.post("/me/photos", upload.single("photo"), async (req, res) => {
-  const userId = req.user!.id;
-  if (!req.file) throw badRequest("Choose a photo to upload.");
-  const type = detectImageType(req.file.buffer);
-  if (!type) throw badRequest("Photos must be JPEG, PNG or WebP images.");
-  const count = await prisma.profilePhoto.count({ where: { userId } });
-  if (count >= MAX_PHOTOS) throw badRequest(`You can add up to ${MAX_PHOTOS} photos.`);
-
-  let clean: Buffer;
-  try {
-    clean = stripMetadata(req.file.buffer, type);
-  } catch {
-    throw badRequest("That image could not be read. Try a different file.");
-  }
-  const storageKey = `${randomToken(18)}.${extensionFor(type)}`;
-  await fs.mkdir(config.uploadDir, { recursive: true });
-  await fs.writeFile(path.join(config.uploadDir, storageKey), clean, { mode: 0o640 });
-  const photo = await prisma.profilePhoto.create({
-    data: { userId, storageKey, mimeType: type, sizeBytes: clean.length, position: count },
-  });
-  ok(res, { id: photo.id, position: photo.position, status: photo.status }, 201);
-});
-
-profilesRouter.delete("/me/photos/:id", async (req, res) => {
-  const userId = req.user!.id;
-  const photo = await prisma.profilePhoto.findFirst({ where: { id: req.params.id, userId } });
-  if (!photo) throw notFound("Photo not found.");
-  await prisma.$transaction(async (tx) => {
-    await tx.profilePhoto.delete({ where: { id: photo.id } });
-    const rest = await tx.profilePhoto.findMany({ where: { userId }, orderBy: { position: "asc" } });
-    for (const [i, p] of rest.entries()) await tx.profilePhoto.update({ where: { id: p.id }, data: { position: i } });
-  });
-  await fs.rm(path.join(config.uploadDir, photo.storageKey), { force: true });
-  ok(res, { deleted: true });
-});
-
 /** Replaces the member's prompt answers (in display order). Unknown prompts are rejected. */
 profilesRouter.put("/me/prompts", async (req, res) => {
   const userId = req.user!.id;
@@ -226,26 +189,6 @@ profilesRouter.put("/me/prompts", async (req, res) => {
     prisma.profilePrompt.createMany({ data: prompts.map((p, position) => ({ userId, promptKey: p.key, answer: cleanPrompt(p.answer), position })) }),
   ]);
   ok(res, await ownProfile(userId));
-});
-
-/** Non-destructive framing: stores the focal point used when the photo is cropped. */
-profilesRouter.patch("/me/photos/:id", async (req, res) => {
-  const userId = req.user!.id;
-  const { id } = parse(z.object({ id: z.string().uuid() }), req.params);
-  const body = parse(z.object({ focusX: z.number().int().min(0).max(100), focusY: z.number().int().min(0).max(100) }), req.body);
-  const { count } = await prisma.profilePhoto.updateMany({ where: { id, userId }, data: body });
-  if (!count) throw notFound("Photo not found.");
-  ok(res, { id, ...body });
-});
-
-profilesRouter.put("/me/photos/order", async (req, res) => {
-  const userId = req.user!.id;
-  const { ids } = parse(z.object({ ids: z.array(z.string().uuid()).max(MAX_PHOTOS) }), req.body);
-  const owned = await prisma.profilePhoto.findMany({ where: { userId }, select: { id: true } });
-  const ownedIds = new Set(owned.map((o) => o.id));
-  if (ids.length !== owned.length || !ids.every((id) => ownedIds.has(id))) throw badRequest("Photo list does not match your photos.");
-  await prisma.$transaction(ids.map((id, position) => prisma.profilePhoto.update({ where: { id }, data: { position } })));
-  ok(res, { ordered: true });
 });
 
 /** Another member's profile. Only published, unblocked, active accounts are visible. */
@@ -274,21 +217,3 @@ metaRouter.get("/interests", async (_req, res) => {
 });
 metaRouter.get("/cities", (_req, res) => ok(res, CITIES.map(({ name, region }) => ({ name, region }))));
 
-/** Serves a profile photo to signed-in members, except between blocked users. */
-export const photosRouter = Router();
-photosRouter.get("/:id", requireAuth, async (req, res) => {
-  const { id } = parse(z.object({ id: z.string().uuid() }), req.params);
-  const photo = await prisma.profilePhoto.findUnique({ where: { id }, include: { user: { select: { status: true } } } });
-  if (!photo) throw notFound();
-  const viewerId = req.user!.id;
-  if (photo.userId !== viewerId) {
-    // Other people's photos are for verified, unrestricted members only.
-    if (req.user!.status !== "ACTIVE") throw notFound();
-    if (photo.status !== "APPROVED" || photo.user.status !== "ACTIVE") throw notFound();
-    if (await isBlockedBetween(viewerId, photo.userId)) throw notFound();
-  }
-  res.setHeader("Cache-Control", "private, max-age=3600");
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.type(photo.mimeType);
-  res.sendFile(path.resolve(config.uploadDir, photo.storageKey));
-});

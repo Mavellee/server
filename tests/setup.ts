@@ -10,3 +10,4 @@ process.env.UPLOAD_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "knot-test-upload
 process.env.AI_PROVIDER = "none";
 process.env.AI_DAILY_USER_LIMIT = "3";
 process.env.AI_TIMEOUT_MS = "300";
+process.env.VIDEO_MAX_MB = "1"; // keeps the size-limit test fast; fixtures are a few KB
