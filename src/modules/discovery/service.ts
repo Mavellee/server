@@ -49,7 +49,8 @@ export async function candidateWhere(userId: string, filters: DiscoveryFilters =
   const exclude = new Set<string>([userId, ...blocked, ...acted.flat().map((a) => a.toUserId)]);
   // Without explicit "sought" intentions, people are matched on their own intentions.
   const soughtExplicit = me.preferences.filter((x) => x.kind === "SOUGHT").map((x) => x.intention);
-  const saved = soughtExplicit.length ? soughtExplicit : me.preferences.filter((x) => x.kind === "OWN").map((x) => x.intention);
+  const myOwn = me.preferences.filter((x) => x.kind === "OWN").map((x) => x.intention);
+  const saved = soughtExplicit.length ? soughtExplicit : myOwn;
   const sought = filters.intentions?.length ? saved.filter((i) => filters.intentions!.includes(i)) : saved;
   if (filters.intentions?.length && !sought.length) return { where: { id: { in: [] } }, me, maxDistanceKm: null };
   const ageMin = Math.max(p.ageMin, filters.ageMin ?? 0);
@@ -70,7 +71,21 @@ export async function candidateWhere(userId: string, filters: DiscoveryFilters =
       ageMin: { lte: myAge },
       ageMax: { gte: myAge },
     },
-    ...(sought.length ? { preferences: { some: { kind: "OWN", intention: { in: sought } } } } : {}),
+    AND: [
+      // They are looking for what I want to see...
+      ...(sought.length ? [{ preferences: { some: { kind: "OWN" as const, intention: { in: sought } } } }] : []),
+      // ...and what they want to see includes what I'm looking for (their explicit choices, or their own intentions).
+      ...(myOwn.length
+        ? [
+            {
+              OR: [
+                { preferences: { some: { kind: "SOUGHT" as const, intention: { in: myOwn } } } },
+                { AND: [{ preferences: { none: { kind: "SOUGHT" as const } } }, { preferences: { some: { kind: "OWN" as const, intention: { in: myOwn } } } }] },
+              ],
+            },
+          ]
+        : []),
+    ],
     ...(filters.interests?.length ? { interests: { some: { interest: { slug: { in: filters.interests } } } } } : {}),
   };
 

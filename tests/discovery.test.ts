@@ -29,10 +29,26 @@ describe("discovery filters", () => {
   });
 
   it("applies sought relationship intentions", async () => {
-    const me = await createUser({ name: "Me", gender: "WOMAN", interestedIn: ["MAN"], sought: ["MARRIAGE"] });
+    const me = await createUser({ name: "Me", gender: "WOMAN", interestedIn: ["MAN"], intentions: ["SITUATIONSHIP", "MARRIAGE"], sought: ["MARRIAGE"] });
     await createUser({ name: "Commit", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["MARRIAGE"] });
     await createUser({ name: "Casual", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["SITUATIONSHIP"] });
     expect(names(await (await loginAs(me)).get("/api/discovery"))).toEqual(["Commit"]);
+  });
+
+  it("applies intentions in both directions: you only see people who want someone like you", async () => {
+    // Situationship herself, but asking to see marriage-minded people.
+    const me = await createUser({ name: "Me", gender: "WOMAN", interestedIn: ["MAN"], intentions: ["SITUATIONSHIP"], sought: ["MARRIAGE"] });
+    await createUser({ name: "MarriageOnly", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["MARRIAGE"] });
+    await createUser({ name: "OpenToCasual", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["MARRIAGE"], sought: ["MARRIAGE", "SITUATIONSHIP"] });
+    await createUser({ name: "ExplicitlyNotCasual", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["MARRIAGE", "SITUATIONSHIP"], sought: ["MARRIAGE"] });
+    const s = await loginAs(me);
+    expect(names(await s.get("/api/discovery"))).toEqual(["OpenToCasual"]);
+
+    // And the result is symmetric: the marriage-only member can't see her either.
+    const marriageOnly = await prisma.user.findFirstOrThrow({ where: { profile: { displayName: "MarriageOnly" } } });
+    expect(names(await (await loginAs(marriageOnly)).get("/api/discovery"))).not.toContain("Me");
+    const open = await prisma.user.findFirstOrThrow({ where: { profile: { displayName: "OpenToCasual" } } });
+    expect(names(await (await loginAs(open)).get("/api/discovery"))).toEqual(["Me"]); // both directions overlap
   });
 
   it("applies the distance limit", async () => {
