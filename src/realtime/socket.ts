@@ -7,7 +7,8 @@ import { ApiError } from "../lib/http.js";
 import { SESSION_COOKIE, userForToken } from "../middleware/auth.js";
 import { assertMember, markRead, sendMessage, MAX_MESSAGE_LENGTH } from "../modules/chat/service.js";
 import { prisma } from "../db.js";
-import { conversationRoom, sessionRoom, setIo, userRoom } from "./bus.js";
+import { addStroke, assertTogether, undoStroke } from "../modules/couple/service.js";
+import { conversationRoom, coupleRoom, sessionRoom, setIo, userRoom } from "./bus.js";
 import { socketConnected, socketDisconnected } from "./presence.js";
 
 function readCookie(header: string | undefined, name: string) {
@@ -31,6 +32,13 @@ function toAckError(e: unknown) {
 const convoInput = z.object({ conversationId: z.string().uuid() });
 const sendInput = convoInput.extend({ body: z.string().min(1).max(MAX_MESSAGE_LENGTH + 100), clientId: z.string().min(6).max(64).optional() });
 const typingInput = convoInput.extend({ isTyping: z.boolean() });
+
+const brush = { c: z.string().regex(/^#[0-9a-fA-F]{6}$/), s: z.number().int().min(1).max(60), e: z.boolean() };
+const coord = z.number().int().min(0).max(1000);
+const strokeInput = z.object({ doodleId: z.string().uuid(), stroke: z.object({ id: z.string().min(6).max(40), ...brush, p: z.array(coord).min(2).max(800) }) });
+const undoInput = z.object({ doodleId: z.string().uuid() });
+const liveInput = z.object({ matchId: z.string().uuid(), doodleId: z.string().uuid(), strokeId: z.string().min(6).max(40), ...brush, p: z.array(coord).min(2).max(200) });
+const MAX_LIVE_PER_SECOND = 40;
 
 export function createSocketServer(http: HttpServer) {
   const io = new Server(http, {
@@ -109,6 +117,48 @@ export function createSocketServer(http: HttpServer) {
         return { sent: true };
       }),
     );
+
+    socket.on(
+      "couple:join",
+      handle(z.object({}), async () => {
+        const r = await assertTogether(userId);
+        await socket.join(coupleRoom(r.matchId));
+        return { matchId: r.matchId };
+      }),
+    );
+
+    socket.on(
+      "doodle:stroke",
+      handle(strokeInput, async ({ doodleId, stroke }) => {
+        const saved = await addStroke(userId, doodleId, stroke);
+        socket.to(coupleRoom(saved.matchId)).emit("doodle:stroke", { doodleId, stroke: saved.stroke });
+        return { saved: true };
+      }),
+    );
+
+    socket.on(
+      "doodle:undo",
+      handle(undoInput, async ({ doodleId }) => {
+        const { matchId, strokeId } = await undoStroke(userId, doodleId);
+        if (strokeId) socket.to(coupleRoom(matchId)).emit("doodle:undo", { doodleId, strokeId });
+        return { strokeId };
+      }),
+    );
+
+    // Pen movement in progress: relayed, never stored. Room membership is the check, so no database hit per point.
+    let liveWindow = 0;
+    let liveCount = 0;
+    socket.on("doodle:live", (raw: unknown) => {
+      const now = Date.now();
+      if (now - liveWindow > 1000) {
+        liveWindow = now;
+        liveCount = 0;
+      }
+      if (++liveCount > MAX_LIVE_PER_SECOND) return;
+      const live = liveInput.safeParse(raw);
+      if (!live.success || !socket.rooms.has(coupleRoom(live.data.matchId))) return;
+      socket.to(coupleRoom(live.data.matchId)).volatile.emit("doodle:live", live.data);
+    });
 
     socket.on(
       "conversation:read",

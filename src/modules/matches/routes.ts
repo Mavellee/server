@@ -6,7 +6,7 @@ import { blockedUserIds } from "../../lib/safety.js";
 import { requireActive } from "../../middleware/auth.js";
 import { publicProfileInclude, toPublicProfile } from "../profiles/serialize.js";
 import { viewerFor } from "../discovery/service.js";
-import { describeDetail, endMatch, likeUser, passUser } from "./service.js";
+import { describeDetail, endMatch, likeUser, passUser, zodiacForMatch } from "./service.js";
 
 const target = z.object({ userId: z.string().uuid() });
 
@@ -100,6 +100,11 @@ matchesRouter.get("/", async (req, res) => {
         profile: toPublicProfile(other, viewer),
       })),
   );
+});
+
+matchesRouter.get("/:id/zodiac", async (req, res) => {
+  const { id } = parse(z.object({ id: z.string().uuid() }), req.params);
+  ok(res, await zodiacForMatch(req.user!.id, id));
 });
 
 matchesRouter.delete("/:id", async (req, res) => {

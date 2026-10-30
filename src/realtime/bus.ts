@@ -27,6 +27,13 @@ export function closeConversationRoom(conversationId: string) {
   io?.in(conversationRoom(conversationId)).socketsLeave(conversationRoom(conversationId));
 }
 
+export const coupleRoom = (matchId: string) => `couple:${matchId}`;
+
+/** Removes every socket from a couple's doodle room when their space closes. */
+export function closeCoupleRoom(matchId: string) {
+  io?.in(coupleRoom(matchId)).socketsLeave(coupleRoom(matchId));
+}
+
 export const sessionRoom = (sessionId: string) => `session:${sessionId}`;
 
 /** Drops live sockets for revoked sessions so they stop receiving events immediately. */

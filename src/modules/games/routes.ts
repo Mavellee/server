@@ -7,6 +7,7 @@ import { notify } from "../../lib/notify.js";
 import { requireActive } from "../../middleware/auth.js";
 import { emitToUser } from "../../realtime/bus.js";
 import { cleanText } from "../chat/service.js";
+import { COUPLE_CATEGORIES } from "../chatgames/rules.js";
 import { catalog } from "../chatgames/service.js";
 
 export const gamesRouter = Router();
@@ -19,7 +20,7 @@ gamesRouter.get("/catalog", async (_req, res) => {
 
 gamesRouter.get("/", async (_req, res) => {
   const games = await prisma.game.findMany({
-    where: { isActive: true },
+    where: { isActive: true, category: { notIn: COUPLE_CATEGORIES } },
     include: { _count: { select: { questions: { where: { isActive: true } } } } },
     orderBy: { name: "asc" },
   });
@@ -44,7 +45,7 @@ const createSchema = z.object({
 gamesRouter.post("/sessions", async (req, res) => {
   const body = parse(createSchema, req.body);
   const me = req.user!.id;
-  const game = await prisma.game.findFirst({ where: { slug: body.gameSlug, isActive: true }, include: { questions: { where: { isActive: true }, select: { id: true } } } });
+  const game = await prisma.game.findFirst({ where: { slug: body.gameSlug, isActive: true, category: { notIn: COUPLE_CATEGORIES } }, include: { questions: { where: { isActive: true }, select: { id: true } } } });
   if (!game) throw notFound("Game not found.");
   if (!game.questions.length) throw badRequest("This game has no questions yet.");
 

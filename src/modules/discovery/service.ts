@@ -60,6 +60,9 @@ export async function candidateWhere(userId: string, filters: DiscoveryFilters =
   const where: Prisma.UserWhereInput = {
     id: { notIn: [...exclude] },
     status: "ACTIVE",
+    // People who are together on Knot never appear here, whatever their pause setting says.
+    matchesA: { none: { status: "ACTIVE", relationship: { status: "ACTIVE" } } },
+    matchesB: { none: { status: "ACTIVE", relationship: { status: "ACTIVE" } } },
     // Age is filtered on date of birth so the exact date is never exposed.
     dateOfBirth: { lte: birthDateForAge(ageMin), gt: birthDateForAge(ageMax + 1) },
     profile: {

@@ -23,6 +23,7 @@ import { safetyRouter } from "./modules/safety/routes.js";
 import { settingsRouter } from "./modules/settings/routes.js";
 import { adminRouter } from "./modules/admin/routes.js";
 import { astroRouter } from "./modules/astro/routes.js";
+import { coupleRouter } from "./modules/couple/routes.js";
 
 export function createApp() {
   const app = express();
@@ -74,6 +75,7 @@ export function createApp() {
   api.use("/settings", settingsRouter);
   api.use("/admin", adminRouter);
   api.use("/astro", astroRouter);
+  api.use("/couple", coupleRouter);
   api.use(notFoundHandler);
 
   app.use("/api", api);

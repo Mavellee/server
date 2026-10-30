@@ -8,6 +8,7 @@ import { sensitiveLimiter } from "../../middleware/security.js";
 import { clearSessionCookie, revokeAllSessions, verifyPassword } from "../auth/service.js";
 import { endMatch } from "../matches/service.js";
 import { disconnectSessions } from "../../realtime/bus.js";
+import { zodiacApplies, zodiacSign } from "../../lib/zodiac.js";
 
 export const DELETION_GRACE_DAYS = 30;
 
@@ -21,17 +22,20 @@ const settingsSchema = z
     typingIndicators: z.boolean(),
     emailNotifications: z.boolean(),
     showDistance: z.boolean(),
+    showZodiacSign: z.boolean(),
   })
   .partial();
 
 settingsRouter.get("/", async (req, res) => {
   const userId = req.user!.id;
-  const [settings, profile] = await Promise.all([
+  const [settings, profile, user] = await Promise.all([
     prisma.userSettings.upsert({ where: { userId }, create: { userId }, update: {} }),
     prisma.profile.findUnique({ where: { userId }, select: { isDiscoverable: true, discoveryPausedAt: true } }),
+    prisma.user.findUnique({ where: { id: userId }, select: { dateOfBirth: true, preferences: { where: { kind: "OWN" }, select: { intention: true } } } }),
   ]);
+  const zodiac = user?.dateOfBirth && zodiacApplies(user.preferences.map((p) => p.intention)) ? zodiacSign(user.dateOfBirth) : null;
   const { userId: _u, updatedAt: _t, ...rest } = settings;
-  ok(res, { ...rest, isDiscoverable: profile?.isDiscoverable ?? true, discoveryPaused: !!profile?.discoveryPausedAt });
+  ok(res, { ...rest, isDiscoverable: profile?.isDiscoverable ?? true, discoveryPaused: !!profile?.discoveryPausedAt, zodiac });
 });
 
 settingsRouter.patch("/", async (req, res) => {
@@ -92,11 +96,13 @@ settingsRouter.get("/export", sensitiveLimiter, async (req, res) => {
       messages: { select: { conversationId: true, body: true, createdAt: true } },
       reportsMade: { select: { reason: true, status: true, createdAt: true } },
       expertRequests: { select: { topic: true, question: true, status: true, createdAt: true } },
+      doodlesStarted: { select: { createdAt: true, strokes: true } },
     },
   });
   res.setHeader("Content-Disposition", 'attachment; filename="knot-data.json"');
   const astro = await prisma.astroProfile.findUnique({ where: { userId } });
-  ok(res, { ...data, astrology: astro && cipherReady() ? { birthDetails: open(astro.birthCipher), accuracy: astro.accuracy, lastUsedAt: astro.lastUsedAt } : null });
+  const relationships = await prisma.relationship.findMany({ where: { match: { OR: [{ userAId: userId }, { userBId: userId }] } }, select: { status: true, startedAt: true, closedAt: true } });
+  ok(res, { ...data, relationships, astrology: astro && cipherReady() ? { birthDetails: open(astro.birthCipher), accuracy: astro.accuracy, lastUsedAt: astro.lastUsedAt } : null });
 });
 
 /**

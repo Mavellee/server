@@ -6,7 +6,7 @@ import { notify } from "../../lib/notify.js";
 import { emitToConversation, emitToUser } from "../../realtime/bus.js";
 import { isOnline } from "../../realtime/presence.js";
 import { assertMember, cleanText, nextMessageTime, serializeMessage } from "../chat/service.js";
-import { GAME_RULES, MAX_NOTE, MAX_TEXT, RULES_VERSION, type GameRules } from "./rules.js";
+import { COUPLE_CATEGORIES, GAME_RULES, MAX_NOTE, MAX_TEXT, RULES_VERSION, type GameRules } from "./rules.js";
 import { assertCanAnswer, assertRoundTransition, assertTransition, LIVE_STATUSES } from "./stateMachine.js";
 
 type Tx = Prisma.TransactionClient;
@@ -152,9 +152,9 @@ export function pickQuestions(questions: { id: string; theme?: string | null }[]
 
 // ---------- queries ----------
 
-export async function catalog() {
+export async function catalog({ couple = false } = {}) {
   const games = await prisma.game.findMany({
-    where: { isActive: true },
+    where: { isActive: true, category: couple ? { in: COUPLE_CATEGORIES } : { notIn: COUPLE_CATEGORIES } },
     include: { questions: { where: { isActive: true }, orderBy: { sortOrder: "asc" }, take: 1 }, _count: { select: { questions: { where: { isActive: true } } } } },
     orderBy: { name: "asc" },
   });
@@ -176,6 +176,10 @@ export async function catalog() {
       preview: sample ? { prompt: sample.prompt, options: r.answer === "choice" ? ((sample.options as string[] | null) ?? []) : null } : null,
     };
   });
+}
+
+async function togetherInConversation(conversationId: string) {
+  return !!(await prisma.relationship.findFirst({ where: { status: "ACTIVE", match: { status: "ACTIVE", conversation: { id: conversationId } } }, select: { id: true } }));
 }
 
 export async function listForConversation(userId: string, conversationId: string) {
@@ -200,6 +204,8 @@ export async function startGame(userId: string, conversationId: string, gameSlug
   const { otherId } = await assertMember(userId, conversationId);
   const game = await prisma.game.findFirst({ where: { slug: gameSlug, isActive: true }, include: { questions: { where: { isActive: true }, select: { id: true, theme: true } } } });
   if (!game) throw notFound("Game not found.");
+  // Same answer as an unknown game, so couple decks stay invisible to everyone else.
+  if (COUPLE_CATEGORIES.includes(game.category) && !(await togetherInConversation(conversationId))) throw notFound("Game not found.");
   const rules = GAME_RULES[game.category];
   if (game.questions.length < 1) throw badRequest("This game has no questions yet.");
   const rounds = Math.min(rules.rounds, game.questions.length);

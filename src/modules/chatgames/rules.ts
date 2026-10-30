@@ -27,7 +27,13 @@ export const GAME_RULES: Record<GameCategory, GameRules> = {
   LOYALTY_BOUNDARIES: { mode: "simultaneous", answer: "choice", agreement: true, notes: true, rounds: 5, minutes: 10, players: 2 },
   LOVE_LANGUAGES: { mode: "simultaneous", answer: "choice", agreement: true, notes: true, rounds: 5, minutes: 8, players: 2 },
   FUN_CHALLENGES: { mode: "simultaneous", answer: "text", agreement: false, notes: false, rounds: 5, minutes: 10, players: 2 },
+  COUPLE_KNOW_ME: { mode: "guess", answer: "text", agreement: false, notes: false, rounds: 6, minutes: 10, players: 2 },
+  COUPLE_THIS_OR_THAT: { mode: "simultaneous", answer: "choice", agreement: true, notes: true, rounds: 8, minutes: 5, players: 2 },
+  COUPLE_OUR_FIRSTS: { mode: "simultaneous", answer: "text", agreement: false, notes: false, rounds: 5, minutes: 10, players: 2 },
 };
+
+/** Decks only a couple can see or start. They never appear in the general catalogue. */
+export const COUPLE_CATEGORIES: GameCategory[] = ["COUPLE_KNOW_ME", "COUPLE_THIS_OR_THAT", "COUPLE_OUR_FIRSTS"];
 
 export const MAX_TEXT = 500;
 export const MAX_NOTE = 280;

@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { ageFrom } from "../../lib/age.js";
 import { approxDistanceLabel, distanceKm } from "../../lib/geo.js";
 import { promptText } from "../../lib/prompts.js";
+import { zodiacApplies, zodiacSign } from "../../lib/zodiac.js";
 
 /** Everything needed to render a profile card. Note: no email, no date of birth, no coordinates leave this module. */
 export const publicProfileInclude = {
@@ -15,6 +16,7 @@ export const publicProfileInclude = {
   preferences: { where: { kind: "OWN" }, select: { intention: true } },
   interests: { include: { interest: true } },
   expertProfile: { select: { status: true } },
+  settings: { select: { showZodiacSign: true } },
 } satisfies Prisma.UserInclude;
 
 export type PublicProfileSource = Prisma.UserGetPayload<{ include: typeof publicProfileInclude }>;
@@ -44,6 +46,8 @@ export function toPublicProfile(user: PublicProfileSource, viewer?: Viewer, opts
     id: user.id,
     displayName: p.displayName,
     age: user.dateOfBirth ? ageFrom(user.dateOfBirth) : null,
+    // Opt-in, and only the sign: the date of birth itself is never exposed.
+    zodiac: user.dateOfBirth && user.settings?.showZodiacSign && zodiacApplies(user.preferences.map((x) => x.intention)) ? zodiacSign(user.dateOfBirth) : null,
     gender: p.gender,
     city: p.city,
     distance,
