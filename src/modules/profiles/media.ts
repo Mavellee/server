@@ -20,7 +20,7 @@ import { uploadLimiter } from "../../middleware/security.js";
  */
 const limits = config.media;
 const incoming = () => path.join(config.uploadDir, ".incoming");
-const fileOf = (key: string) => path.join(config.uploadDir, key);
+export const fileOf = (key: string) => path.join(config.uploadDir, key);
 
 // Uploads stream to disk (videos can be 50 MB), then are validated by content before being kept.
 const upload = multer({

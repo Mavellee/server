@@ -102,7 +102,8 @@ settingsRouter.get("/export", sensitiveLimiter, async (req, res) => {
   res.setHeader("Content-Disposition", 'attachment; filename="knot-data.json"');
   const astro = await prisma.astroProfile.findUnique({ where: { userId } });
   const relationships = await prisma.relationship.findMany({ where: { match: { OR: [{ userAId: userId }, { userBId: userId }] } }, select: { status: true, startedAt: true, closedAt: true } });
-  ok(res, { ...data, relationships, astrology: astro && cipherReady() ? { birthDetails: open(astro.birthCipher), accuracy: astro.accuracy, lastUsedAt: astro.lastUsedAt } : null });
+  const friendReviews = await prisma.friendReview.findMany({ where: { requesterId: userId }, select: { status: true, friendName: true, verdict: true, comment: true, createdAt: true } });
+  ok(res, { ...data, relationships, friendReviews, astrology: astro && cipherReady() ? { birthDetails: open(astro.birthCipher), accuracy: astro.accuracy, lastUsedAt: astro.lastUsedAt } : null });
 });
 
 /**

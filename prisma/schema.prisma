@@ -474,6 +474,7 @@ model Match {
   gameSessions GameSession[]
   astroSession AstroSession?
   relationship Relationship?
+  friendReviews FriendReview[]
   doodles      Doodle[]
 
   @@unique([userAId, userBId])
@@ -518,6 +519,43 @@ model Doodle {
   createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   @@index([matchId, updatedAt])
+}
+
+// ---------- TRUSTED FRIEND REVIEW ----------
+
+enum FriendReviewStatus {
+  PENDING // waiting for the person being reviewed to agree
+  ALLOWED
+  DECLINED
+  REVIEWED
+  REVOKED
+}
+
+enum FriendVerdict {
+  GOOD_FEELING
+  ASK_MORE
+  NOT_SURE
+}
+
+// Only a hash of the friend's link is stored. Replies are visible to the asker alone and never affect matching.
+model FriendReview {
+  id          String             @id @default(uuid()) @db.Uuid
+  matchId     String             @db.Uuid
+  requesterId String             @db.Uuid
+  subjectId   String             @db.Uuid
+  status      FriendReviewStatus @default(PENDING)
+  tokenHash   String?            @unique
+  expiresAt   DateTime?
+  friendName  String?
+  verdict     FriendVerdict?
+  comment     String?
+  closedById  String?            @db.Uuid
+  closedAt    DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  match       Match              @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@index([matchId, requesterId])
 }
 
 // ---------- CHAT ----------

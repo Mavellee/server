@@ -9,6 +9,7 @@ import { closeConversationRoom, emitToUser } from "../../realtime/bus.js";
 import { cancelLiveGamesForConversation } from "../chatgames/service.js";
 import { astroEligible, closeForMatch } from "../astro/service.js";
 import { closeForEndedMatch } from "../couple/service.js";
+import { closeForEndedMatch as closeFriendReviews } from "../friendreview/service.js";
 import { zodiacApplies, zodiacPair, zodiacSign } from "../../lib/zodiac.js";
 
 /** Can `fromId` act on `toId` at all (like, pass, view)? */
@@ -137,6 +138,7 @@ export async function endMatch(userId: string, matchId: string, status: "UNMATCH
   if (match.conversation) closeConversationRoom(match.conversation.id);
   await closeForMatch(match.id);
   await closeForEndedMatch(userId, match);
+  await closeFriendReviews(match.id);
   const otherId = match.userAId === userId ? match.userBId : match.userAId;
   for (const id of [userId, otherId]) emitToUser(id, "match:ended", { matchId: match.id, conversationId: match.conversation?.id });
   return updated;
