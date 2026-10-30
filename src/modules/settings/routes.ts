@@ -1,3 +1,4 @@
+import { cipherReady, open } from "../astro/cipher.js";
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../../db.js";
@@ -94,7 +95,8 @@ settingsRouter.get("/export", sensitiveLimiter, async (req, res) => {
     },
   });
   res.setHeader("Content-Disposition", 'attachment; filename="knot-data.json"');
-  ok(res, data);
+  const astro = await prisma.astroProfile.findUnique({ where: { userId } });
+  ok(res, { ...data, astrology: astro && cipherReady() ? { birthDetails: open(astro.birthCipher), accuracy: astro.accuracy, lastUsedAt: astro.lastUsedAt } : null });
 });
 
 /**

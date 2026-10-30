@@ -28,7 +28,7 @@ function requestOrigin(req: Request) {
   }
 }
 
-const limiter = (opts: Partial<Options>) =>
+export const limiter = (opts: Partial<Options>) =>
   rateLimit({
     standardHeaders: "draft-7",
     legacyHeaders: false,

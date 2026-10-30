@@ -5,6 +5,7 @@ import path from "node:path";
 import { prisma } from "../db.js";
 import { config } from "../config.js";
 import { DELETION_GRACE_DAYS } from "../modules/settings/routes.js";
+import { purgeExpired } from "../modules/astro/service.js";
 
 const cutoff = new Date(Date.now() - DELETION_GRACE_DAYS * 86400000);
 const users = await prisma.user.findMany({
@@ -22,4 +23,5 @@ for (const u of users) {
   await prisma.adminAuditLog.create({ data: { action: "user.purged", targetType: "User", targetId: u.id } });
 }
 console.log(`Purged ${users.length} account(s) past the ${DELETION_GRACE_DAYS}-day grace period.`);
+console.log(`Removed birth details for ${await purgeExpired()} member(s) past the Knot Astro retention period.`);
 await prisma.$disconnect();

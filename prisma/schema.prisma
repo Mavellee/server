@@ -234,6 +234,9 @@ model User {
   notifications      Notification[]
   aiUsage            AIUsage[]
   subscription       Subscription?
+  astroProfile       AstroProfile?
+  astroCharts        AstroChart[]
+  astroConsents      AstroConsent[]
 
   @@index([status, role])
 }
@@ -464,6 +467,7 @@ model Match {
   userB        User          @relation("MatchB", fields: [userBId], references: [id], onDelete: Cascade)
   conversation Conversation?
   gameSessions GameSession[]
+  astroSession AstroSession?
 
   @@unique([userAId, userBId])
   @@index([userAId, status])
@@ -769,6 +773,100 @@ model AIUsage {
 
   @@index([userId, createdAt])
   @@index([createdAt])
+}
+
+// ---------- KNOT ASTRO ----------
+
+enum AstroStatus {
+  AWAITING_CONSENT
+  COLLECTING
+  CALCULATING
+  INTERPRETING
+  READY
+  PARTIAL
+  FAILED
+  DECLINED
+  WITHDRAWN
+}
+
+enum AstroConsentState {
+  INTERESTED
+  CONSENTED
+  DECLINED
+  WITHDRAWN
+}
+
+enum AstroTimeAccuracy {
+  EXACT
+  APPROXIMATE
+  UNKNOWN
+}
+
+// Birth details, encrypted with AES-256-GCM (date, time, place are never stored in the clear).
+model AstroProfile {
+  userId      String            @id @db.Uuid
+  birthCipher String
+  accuracy    AstroTimeAccuracy
+  lastUsedAt  DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([lastUsedAt])
+}
+
+// Sign-level calculated chart, cached per calculation version.
+model AstroChart {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  version   String
+  data      Json
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, version])
+}
+
+model AstroSession {
+  id         String         @id @default(uuid()) @db.Uuid
+  matchId    String         @unique @db.Uuid
+  status     AstroStatus    @default(AWAITING_CONSENT)
+  failure    String?
+  aiAttempts Int            @default(0)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  match      Match          @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  consents   AstroConsent[]
+  report     AstroReport?
+}
+
+model AstroConsent {
+  sessionId    String            @db.Uuid
+  userId       String            @db.Uuid
+  state        AstroConsentState
+  shareSummary Boolean           @default(false)
+  externalAi   Boolean           @default(false)
+  useInterests Boolean           @default(false)
+  consentedAt  DateTime?
+  withdrawnAt  DateTime?
+  session      AstroSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, userId])
+  @@index([userId])
+}
+
+// Calculation and interpretation are stored apart; one row per session means one report per match.
+model AstroReport {
+  id             String       @id @default(uuid()) @db.Uuid
+  sessionId      String       @unique @db.Uuid
+  version        String
+  calculation    Json
+  interpretation Json?
+  model          String?
+  generatedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  session        AstroSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
 
 model Subscription {

@@ -7,6 +7,7 @@ import { isBlockedBetween, orderedPair } from "../../lib/safety.js";
 import { notify } from "../../lib/notify.js";
 import { closeConversationRoom, emitToUser } from "../../realtime/bus.js";
 import { cancelLiveGamesForConversation } from "../chatgames/service.js";
+import { astroEligible, closeForMatch } from "../astro/service.js";
 
 /** Can `fromId` act on `toId` at all (like, pass, view)? */
 async function assertActionable(fromId: string, toId: string) {
@@ -102,7 +103,9 @@ export async function likeUser(fromId: string, toId: string, detail?: LikeDetail
       emitToUser(me, "match:new", { matchId: result.matchId, conversationId: result.conversationId });
     }
   }
-  return { matched: result.matched, matchId: result.matchId, alreadyLiked: result.alreadyLiked };
+  // Eligibility is decided here on the server; the client only shows the invitation when told to.
+  const astroAvailable = result.matched ? await astroEligible(fromId, toId) : false;
+  return { matched: result.matched, matchId: result.matchId, alreadyLiked: result.alreadyLiked, astroAvailable };
 }
 
 export async function passUser(fromId: string, toId: string) {
@@ -130,6 +133,7 @@ export async function endMatch(userId: string, matchId: string, status: "UNMATCH
   await prisma.gameSession.updateMany({ where: { matchId: match.id, status: "ACTIVE" }, data: { status: "ENDED", endedAt: new Date() } });
   if (match.conversation) await cancelLiveGamesForConversation(match.conversation.id, userId);
   if (match.conversation) closeConversationRoom(match.conversation.id);
+  await closeForMatch(match.id);
   const otherId = match.userAId === userId ? match.userBId : match.userAId;
   for (const id of [userId, otherId]) emitToUser(id, "match:ended", { matchId: match.id, conversationId: match.conversation?.id });
   return updated;

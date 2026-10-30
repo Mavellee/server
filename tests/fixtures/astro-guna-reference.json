@@ -1,0 +1,4502 @@
+[
+{
+"boy": [
+10,
+1
+],
+"girl": [
+3,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+2
+],
+"girl": [
+25,
+2
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+3
+],
+"girl": [
+16,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+5,
+4
+],
+"girl": [
+22,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+15,
+1
+],
+"girl": [
+4,
+2
+],
+"vashya": 0.5,
+"gana": 5.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+4
+],
+"girl": [
+17,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+18,
+4
+],
+"girl": [
+25,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+3
+],
+"girl": [
+25,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+1
+],
+"girl": [
+4,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+3,
+2
+],
+"girl": [
+26,
+2
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+4
+],
+"girl": [
+24,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+1,
+2
+],
+"girl": [
+27,
+4
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+18,
+4
+],
+"girl": [
+5,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+10,
+4
+],
+"girl": [
+10,
+2
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+21,
+4
+],
+"girl": [
+16,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+9,
+4
+],
+"girl": [
+15,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+8,
+2
+],
+"girl": [
+3,
+2
+],
+"vashya": 1.0,
+"gana": 1.0,
+"yoni": 4.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+18,
+4
+],
+"girl": [
+10,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+3
+],
+"girl": [
+2,
+4
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+4
+],
+"girl": [
+11,
+2
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+19,
+1
+],
+"girl": [
+8,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+16,
+1
+],
+"girl": [
+7,
+3
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+1
+],
+"girl": [
+26,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+6,
+3
+],
+"girl": [
+23,
+4
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+9,
+4
+],
+"girl": [
+5,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 1.0,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+1
+],
+"girl": [
+9,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+6,
+4
+],
+"girl": [
+1,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+20,
+4
+],
+"girl": [
+10,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+15,
+4
+],
+"girl": [
+5,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+1,
+3
+],
+"girl": [
+9,
+1
+],
+"vashya": 1.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+2
+],
+"girl": [
+24,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+3,
+2
+],
+"girl": [
+20,
+2
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+7,
+1
+],
+"girl": [
+5,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+2
+],
+"girl": [
+19,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+2,
+3
+],
+"girl": [
+14,
+2
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+12,
+2
+],
+"girl": [
+19,
+4
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+2,
+1
+],
+"girl": [
+20,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+11,
+1
+],
+"girl": [
+24,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+18,
+4
+],
+"girl": [
+20,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+3
+],
+"girl": [
+7,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+15,
+3
+],
+"girl": [
+22,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+17,
+1
+],
+"girl": [
+21,
+3
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+15,
+4
+],
+"girl": [
+25,
+4
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+22,
+4
+],
+"girl": [
+15,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+17,
+4
+],
+"girl": [
+13,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+6,
+1
+],
+"girl": [
+10,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+14,
+4
+],
+"girl": [
+13,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+4,
+3
+],
+"girl": [
+22,
+1
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+2,
+2
+],
+"girl": [
+12,
+4
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+6,
+1
+],
+"girl": [
+17,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+19,
+4
+],
+"girl": [
+3,
+1
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+9,
+1
+],
+"girl": [
+25,
+4
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+10,
+4
+],
+"girl": [
+4,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+26,
+2
+],
+"girl": [
+26,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+17,
+3
+],
+"girl": [
+5,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+4
+],
+"girl": [
+2,
+4
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+2
+],
+"girl": [
+19,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+16,
+4
+],
+"girl": [
+25,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+1
+],
+"girl": [
+26,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+15,
+3
+],
+"girl": [
+15,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+22,
+4
+],
+"girl": [
+3,
+1
+],
+"vashya": 1.0,
+"gana": 1.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+14,
+2
+],
+"girl": [
+7,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+2
+],
+"girl": [
+1,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+1
+],
+"girl": [
+21,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+16,
+2
+],
+"girl": [
+23,
+2
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+1
+],
+"girl": [
+18,
+1
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+9,
+4
+],
+"girl": [
+7,
+4
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+4
+],
+"girl": [
+3,
+2
+],
+"vashya": 0.5,
+"gana": 1.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+4
+],
+"girl": [
+13,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+2,
+1
+],
+"girl": [
+10,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+3
+],
+"girl": [
+12,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+4
+],
+"girl": [
+25,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+2
+],
+"girl": [
+23,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 0.0
+},
+{
+"boy": [
+27,
+2
+],
+"girl": [
+15,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+7,
+1
+],
+"girl": [
+21,
+1
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+27,
+2
+],
+"girl": [
+27,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+13,
+2
+],
+"girl": [
+14,
+4
+],
+"vashya": 2.0,
+"gana": 1.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+3
+],
+"girl": [
+6,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+22,
+3
+],
+"girl": [
+21,
+3
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+22,
+3
+],
+"girl": [
+10,
+1
+],
+"vashya": 2.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+4,
+4
+],
+"girl": [
+22,
+2
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+25,
+4
+],
+"girl": [
+12,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+9,
+1
+],
+"girl": [
+1,
+4
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+1
+],
+"girl": [
+1,
+3
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+22,
+4
+],
+"girl": [
+1,
+1
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+1
+],
+"girl": [
+14,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+11,
+4
+],
+"girl": [
+7,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 0.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+5,
+3
+],
+"girl": [
+24,
+3
+],
+"vashya": 2.0,
+"gana": 1.0,
+"yoni": 3.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+3,
+2
+],
+"girl": [
+17,
+4
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+19,
+2
+],
+"girl": [
+4,
+2
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+1
+],
+"girl": [
+25,
+2
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+19,
+2
+],
+"girl": [
+10,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+4,
+2
+],
+"girl": [
+12,
+3
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+14,
+1
+],
+"girl": [
+6,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+3,
+3
+],
+"girl": [
+3,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+16,
+3
+],
+"girl": [
+8,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+6,
+3
+],
+"girl": [
+24,
+3
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+1,
+4
+],
+"girl": [
+2,
+2
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+1
+],
+"girl": [
+16,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+17,
+1
+],
+"girl": [
+22,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+16,
+3
+],
+"girl": [
+27,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+5,
+3
+],
+"girl": [
+2,
+1
+],
+"vashya": 0.5,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+2,
+3
+],
+"girl": [
+20,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+4
+],
+"girl": [
+22,
+1
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+24,
+2
+],
+"girl": [
+7,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+2,
+3
+],
+"girl": [
+23,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+15,
+2
+],
+"girl": [
+9,
+2
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+1
+],
+"girl": [
+26,
+4
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 0.0
+},
+{
+"boy": [
+13,
+3
+],
+"girl": [
+6,
+3
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+21,
+4
+],
+"girl": [
+16,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+11,
+3
+],
+"girl": [
+10,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+1
+],
+"girl": [
+19,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+9,
+4
+],
+"girl": [
+22,
+2
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+2,
+2
+],
+"girl": [
+13,
+3
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+3
+],
+"girl": [
+27,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+1,
+2
+],
+"girl": [
+3,
+3
+],
+"vashya": 2.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+3,
+4
+],
+"girl": [
+19,
+2
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+5,
+1
+],
+"girl": [
+11,
+4
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+3
+],
+"girl": [
+27,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+2
+],
+"girl": [
+7,
+3
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+2,
+1
+],
+"girl": [
+21,
+3
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+8,
+2
+],
+"girl": [
+26,
+2
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+16,
+2
+],
+"girl": [
+24,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+1
+],
+"girl": [
+7,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+1
+],
+"girl": [
+17,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+10,
+4
+],
+"girl": [
+26,
+4
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+6,
+4
+],
+"girl": [
+19,
+4
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 4.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+27,
+1
+],
+"girl": [
+18,
+1
+],
+"vashya": 1.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+2,
+3
+],
+"girl": [
+12,
+4
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+4
+],
+"girl": [
+15,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+4
+],
+"girl": [
+17,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+14,
+3
+],
+"girl": [
+18,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+6,
+1
+],
+"girl": [
+27,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+15,
+2
+],
+"girl": [
+5,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+18,
+2
+],
+"girl": [
+23,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+3
+],
+"girl": [
+25,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+15,
+3
+],
+"girl": [
+16,
+4
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 0.0
+},
+{
+"boy": [
+25,
+2
+],
+"girl": [
+19,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+3
+],
+"girl": [
+10,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+4
+],
+"girl": [
+9,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+22,
+1
+],
+"girl": [
+23,
+3
+],
+"vashya": 0.5,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+4,
+4
+],
+"girl": [
+16,
+1
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+3
+],
+"girl": [
+3,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+1
+],
+"girl": [
+25,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+2
+],
+"girl": [
+5,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+17,
+2
+],
+"girl": [
+12,
+1
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+1
+],
+"girl": [
+7,
+1
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+10,
+1
+],
+"girl": [
+2,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+2
+],
+"girl": [
+19,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+17,
+3
+],
+"girl": [
+10,
+4
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+10,
+4
+],
+"girl": [
+5,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+4
+],
+"girl": [
+2,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+12,
+2
+],
+"girl": [
+27,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+4
+],
+"girl": [
+6,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+4
+],
+"girl": [
+12,
+1
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+1,
+2
+],
+"girl": [
+20,
+4
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+22,
+4
+],
+"girl": [
+27,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 3.0,
+"nadi": 0.0
+},
+{
+"boy": [
+12,
+4
+],
+"girl": [
+21,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+1,
+4
+],
+"girl": [
+2,
+1
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+15,
+2
+],
+"girl": [
+4,
+1
+],
+"vashya": 0.5,
+"gana": 5.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+2
+],
+"girl": [
+12,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+2
+],
+"girl": [
+11,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+4
+],
+"girl": [
+25,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+6,
+1
+],
+"girl": [
+6,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+3,
+2
+],
+"girl": [
+4,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+25,
+1
+],
+"girl": [
+3,
+4
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+24,
+4
+],
+"girl": [
+5,
+3
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 3.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+3
+],
+"girl": [
+12,
+3
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+18,
+3
+],
+"girl": [
+20,
+4
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+14,
+2
+],
+"girl": [
+15,
+3
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+4
+],
+"girl": [
+2,
+2
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+14,
+2
+],
+"girl": [
+14,
+1
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+1
+],
+"girl": [
+10,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+27,
+4
+],
+"girl": [
+7,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+3
+],
+"girl": [
+9,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+19,
+3
+],
+"girl": [
+8,
+1
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+1,
+4
+],
+"girl": [
+10,
+4
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+2
+],
+"girl": [
+12,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+3,
+2
+],
+"girl": [
+6,
+1
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+3
+],
+"girl": [
+15,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+1,
+4
+],
+"girl": [
+7,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+15,
+1
+],
+"girl": [
+1,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 0.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+10,
+3
+],
+"girl": [
+3,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+4
+],
+"girl": [
+8,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+18,
+2
+],
+"girl": [
+7,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+12,
+2
+],
+"girl": [
+9,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 1.0,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+2
+],
+"girl": [
+25,
+3
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+4
+],
+"girl": [
+7,
+3
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+1
+],
+"girl": [
+15,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+7,
+3
+],
+"girl": [
+25,
+3
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+14,
+4
+],
+"girl": [
+6,
+4
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+8,
+1
+],
+"girl": [
+3,
+4
+],
+"vashya": 1.0,
+"gana": 1.0,
+"yoni": 4.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+4
+],
+"girl": [
+12,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+3
+],
+"girl": [
+10,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+1
+],
+"girl": [
+2,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+12,
+2
+],
+"girl": [
+16,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+15,
+2
+],
+"girl": [
+6,
+4
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+4,
+4
+],
+"girl": [
+25,
+3
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+2,
+1
+],
+"girl": [
+3,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 3.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+22,
+3
+],
+"girl": [
+10,
+3
+],
+"vashya": 2.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+26,
+4
+],
+"girl": [
+20,
+3
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+5,
+4
+],
+"girl": [
+26,
+2
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+12,
+4
+],
+"girl": [
+1,
+4
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+19,
+4
+],
+"girl": [
+24,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 3.0,
+"nadi": 0.0
+},
+{
+"boy": [
+9,
+2
+],
+"girl": [
+21,
+3
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+25,
+4
+],
+"girl": [
+5,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+1
+],
+"girl": [
+24,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+10,
+1
+],
+"girl": [
+6,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+2
+],
+"girl": [
+20,
+3
+],
+"vashya": 0.5,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+8,
+1
+],
+"girl": [
+12,
+3
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 1.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+3
+],
+"girl": [
+24,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+17,
+3
+],
+"girl": [
+1,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+3
+],
+"girl": [
+15,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+27,
+2
+],
+"girl": [
+25,
+2
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 0.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+4,
+3
+],
+"girl": [
+20,
+2
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+4,
+4
+],
+"girl": [
+13,
+1
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+23,
+4
+],
+"girl": [
+4,
+3
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+1
+],
+"girl": [
+23,
+4
+],
+"vashya": 2.0,
+"gana": 1.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+3
+],
+"girl": [
+18,
+1
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+26,
+3
+],
+"girl": [
+11,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+9,
+3
+],
+"girl": [
+2,
+2
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+17,
+3
+],
+"girl": [
+14,
+4
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 0.0
+},
+{
+"boy": [
+7,
+2
+],
+"girl": [
+19,
+2
+],
+"vashya": 2.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+4,
+1
+],
+"girl": [
+4,
+2
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+13,
+4
+],
+"girl": [
+3,
+1
+],
+"vashya": 0.5,
+"gana": 1.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+3
+],
+"girl": [
+18,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+9,
+2
+],
+"girl": [
+3,
+1
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+22,
+3
+],
+"girl": [
+7,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+18,
+1
+],
+"girl": [
+12,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+11,
+2
+],
+"girl": [
+2,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+9,
+3
+],
+"girl": [
+4,
+3
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+5,
+3
+],
+"girl": [
+10,
+2
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+2,
+2
+],
+"girl": [
+4,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+1
+],
+"girl": [
+10,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+8,
+1
+],
+"girl": [
+26,
+3
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+12,
+4
+],
+"girl": [
+22,
+4
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+22,
+4
+],
+"girl": [
+6,
+3
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+7,
+4
+],
+"girl": [
+23,
+4
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+3
+],
+"girl": [
+8,
+1
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+13,
+4
+],
+"girl": [
+17,
+1
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+2
+],
+"girl": [
+11,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+4,
+1
+],
+"girl": [
+27,
+2
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+2
+],
+"girl": [
+26,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 3.0,
+"nadi": 8.0
+},
+{
+"boy": [
+14,
+1
+],
+"girl": [
+11,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+2
+],
+"girl": [
+12,
+3
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+5,
+4
+],
+"girl": [
+19,
+1
+],
+"vashya": 2.0,
+"gana": 1.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+16,
+4
+],
+"girl": [
+25,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+1
+],
+"girl": [
+8,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+3
+],
+"girl": [
+18,
+2
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+2
+],
+"girl": [
+4,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+18,
+3
+],
+"girl": [
+14,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+14,
+1
+],
+"girl": [
+15,
+3
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+25,
+1
+],
+"girl": [
+6,
+3
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+16,
+4
+],
+"girl": [
+7,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+1
+],
+"girl": [
+2,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+16,
+4
+],
+"girl": [
+19,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+22,
+3
+],
+"girl": [
+6,
+4
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+16,
+3
+],
+"girl": [
+4,
+2
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+2,
+2
+],
+"girl": [
+11,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+16,
+3
+],
+"girl": [
+19,
+3
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+6,
+4
+],
+"girl": [
+18,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+8,
+3
+],
+"girl": [
+8,
+2
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+1,
+1
+],
+"girl": [
+20,
+1
+],
+"vashya": 0.5,
+"gana": 5.0,
+"yoni": 3.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+19,
+1
+],
+"girl": [
+12,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+24,
+3
+],
+"girl": [
+13,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 4.0,
+"nadi": 0.0
+},
+{
+"boy": [
+20,
+2
+],
+"girl": [
+11,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+17,
+2
+],
+"girl": [
+25,
+1
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+22,
+1
+],
+"girl": [
+22,
+1
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+9,
+2
+],
+"girl": [
+19,
+3
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+2,
+1
+],
+"girl": [
+25,
+2
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+18,
+2
+],
+"girl": [
+8,
+3
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+1
+],
+"girl": [
+16,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+3
+],
+"girl": [
+20,
+4
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+11,
+4
+],
+"girl": [
+23,
+4
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+21,
+3
+],
+"girl": [
+14,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+13,
+4
+],
+"girl": [
+21,
+1
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+9,
+3
+],
+"girl": [
+14,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+3,
+3
+],
+"girl": [
+9,
+4
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+23,
+2
+],
+"girl": [
+9,
+1
+],
+"vashya": 1.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+11,
+4
+],
+"girl": [
+15,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.0,
+"nadi": 8.0
+},
+{
+"boy": [
+5,
+3
+],
+"girl": [
+6,
+3
+],
+"vashya": 2.0,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+10,
+2
+],
+"girl": [
+3,
+3
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 1.0,
+"maitri": 0.0,
+"nadi": 0.0
+},
+{
+"boy": [
+2,
+3
+],
+"girl": [
+23,
+3
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+2,
+2
+],
+"girl": [
+9,
+4
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+27,
+2
+],
+"girl": [
+7,
+2
+],
+"vashya": 0.0,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+2
+],
+"girl": [
+20,
+2
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+8,
+3
+],
+"girl": [
+3,
+4
+],
+"vashya": 1.0,
+"gana": 1.0,
+"yoni": 4.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+17,
+2
+],
+"girl": [
+6,
+4
+],
+"vashya": 0.0,
+"gana": 5.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+2,
+4
+],
+"girl": [
+14,
+1
+],
+"vashya": 0.5,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 0.5,
+"nadi": 0.0
+},
+{
+"boy": [
+19,
+1
+],
+"girl": [
+27,
+2
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+5,
+3
+],
+"girl": [
+9,
+4
+],
+"vashya": 0.0,
+"gana": 1.0,
+"yoni": 1.0,
+"maitri": 1.0,
+"nadi": 8.0
+},
+{
+"boy": [
+7,
+3
+],
+"girl": [
+2,
+4
+],
+"vashya": 0.5,
+"gana": 5.0,
+"yoni": 2.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+20,
+1
+],
+"girl": [
+10,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+12,
+2
+],
+"girl": [
+14,
+2
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+10,
+1
+],
+"girl": [
+8,
+1
+],
+"vashya": 2.0,
+"gana": 0.0,
+"yoni": 1.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+26,
+1
+],
+"girl": [
+16,
+1
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 0.0,
+"maitri": 0.5,
+"nadi": 8.0
+},
+{
+"boy": [
+1,
+4
+],
+"girl": [
+1,
+2
+],
+"vashya": 2.0,
+"gana": 6.0,
+"yoni": 4.0,
+"maitri": 5.0,
+"nadi": 0.0
+},
+{
+"boy": [
+20,
+4
+],
+"girl": [
+18,
+2
+],
+"vashya": 1.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 8.0
+},
+{
+"boy": [
+21,
+2
+],
+"girl": [
+13,
+3
+],
+"vashya": 0.5,
+"gana": 6.0,
+"yoni": 2.0,
+"maitri": 4.0,
+"nadi": 8.0
+},
+{
+"boy": [
+16,
+3
+],
+"girl": [
+21,
+3
+],
+"vashya": 0.0,
+"gana": 0.0,
+"yoni": 2.0,
+"maitri": 5.0,
+"nadi": 0.0
+}
+]

@@ -8,6 +8,7 @@ process.env.APP_ORIGIN = "http://localhost:5180";
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL ?? "postgresql://knot:knot_dev_password@localhost:5433/knot_test";
 process.env.UPLOAD_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "knot-test-uploads-"));
 process.env.AI_PROVIDER = "none";
+process.env.ASTRO_ENCRYPTION_KEY = "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE="; // test-only key
 process.env.AI_DAILY_USER_LIMIT = "3";
 process.env.AI_TIMEOUT_MS = "300";
 process.env.VIDEO_MAX_MB = "1"; // keeps the size-limit test fast; fixtures are a few KB
