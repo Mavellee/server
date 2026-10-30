@@ -142,6 +142,13 @@ describe("couple games", () => {
     await p.A.post(`/api/conversations/${conv.id}/games`).send({ gameSlug: "couple-know-me" }).expect(404);
   });
 
+  it("scores agreement only on options that mean the same to both players", async () => {
+    // "Me" from both players would count as agreeing, when they are actually disagreeing.
+    const qs = await prisma.gameQuestion.findMany({ where: { isActive: true, game: { slug: "couple-this-or-that" } } });
+    expect(qs.length).toBeGreaterThan(0);
+    for (const q of qs) for (const o of q.options as string[]) expect(o).not.toMatch(/\b(me|you)\b/i);
+  });
+
   it("can be played by a couple and are cancelled when it ends", async () => {
     const p = await together();
     const space = (await p.A.get("/api/couple/me")).body.data;
