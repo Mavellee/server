@@ -144,14 +144,14 @@ export async function endMatch(userId: string, matchId: string, status: "UNMATCH
   return updated;
 }
 
-/** The just-for-fun sign card: only when both people have chosen to show their sign. Never used for matching. */
+/** The just-for-fun sign card: only when both people are showing their sign. Never used for matching. */
 export async function zodiacForMatch(userId: string, matchId: string) {
   const match = await prisma.match.findFirst({ where: { id: matchId, status: "ACTIVE", OR: [{ userAId: userId }, { userBId: userId }] } });
   if (!match) throw notFound("Match not found.");
   const otherId = match.userAId === userId ? match.userBId : match.userAId;
   const sign = async (id: string) => {
     const u = await prisma.user.findUnique({ where: { id }, select: { dateOfBirth: true, settings: { select: { showZodiacSign: true } }, preferences: { where: { kind: "OWN" }, select: { intention: true } } } });
-    return u?.dateOfBirth && u.settings?.showZodiacSign && zodiacApplies(u.preferences.map((p) => p.intention)) ? zodiacSign(u.dateOfBirth) : null;
+    return u?.dateOfBirth && u.settings?.showZodiacSign !== false && zodiacApplies(u.preferences.map((p) => p.intention)) ? zodiacSign(u.dateOfBirth) : null;
   };
   const [mine, theirs] = [await sign(userId), await sign(otherId)];
   return mine && theirs ? { mine, theirs, ...zodiacPair(mine, theirs) } : null;

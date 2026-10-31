@@ -23,7 +23,7 @@ export function zodiacSign(dateOfBirth: Date) {
   const month = dateOfBirth.getUTCMonth() + 1;
   const day = dateOfBirth.getUTCDate();
   const sign = SIGNS.find((s) => s.endMonth === month && day <= s.endDay) ?? SIGNS.find((s) => s.endMonth === (month % 12) + 1)!;
-  return { name: sign.name, symbol: `${sign.symbol}\uFE0E` }; // text style, not the purple emoji
+  return { name: sign.name, symbol: `${sign.symbol}\uFE0E`, element: sign.element }; // text style, not the purple emoji
 }
 
 /** The badge is for casual and dating. Long-term-only members have Knot Astro instead. */

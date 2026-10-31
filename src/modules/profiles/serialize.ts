@@ -46,8 +46,8 @@ export function toPublicProfile(user: PublicProfileSource, viewer?: Viewer, opts
     id: user.id,
     displayName: p.displayName,
     age: user.dateOfBirth ? ageFrom(user.dateOfBirth) : null,
-    // Opt-in, and only the sign: the date of birth itself is never exposed.
-    zodiac: user.dateOfBirth && user.settings?.showZodiacSign && zodiacApplies(user.preferences.map((x) => x.intention)) ? zodiacSign(user.dateOfBirth) : null,
+    // Only the sign, and members can hide it: the date of birth itself is never exposed.
+    zodiac: user.dateOfBirth && user.settings?.showZodiacSign !== false && zodiacApplies(user.preferences.map((x) => x.intention)) ? zodiacSign(user.dateOfBirth) : null,
     gender: p.gender,
     city: p.city,
     distance,

@@ -30,14 +30,25 @@ describe("zodiac", () => {
     expect(at("1995-12-22")).toBe("Capricorn");
   });
 
-  it("is off by default, opt-in, and never exposes the birth date", async () => {
+  it("shows by default with its type, can be hidden, and never exposes the birth date", async () => {
     const p = await pair();
     let r = await p.B.get(`/api/profiles/${p.ua.id}`).expect(200);
-    expect(r.body.data.zodiac).toBeNull();
-    await p.A.patch("/api/settings").send({ showZodiacSign: true }).expect(200);
-    r = await p.B.get(`/api/profiles/${p.ua.id}`).expect(200);
     expect(r.body.data.zodiac.name).toBeTruthy();
+    expect(["Fire", "Earth", "Air", "Water"]).toContain(r.body.data.zodiac.element);
     expect(JSON.stringify(r.body.data)).not.toContain("dateOfBirth");
+    await p.A.patch("/api/settings").send({ showZodiacSign: false }).expect(200);
+    r = await p.B.get(`/api/profiles/${p.ua.id}`).expect(200);
+    expect(r.body.data.zodiac).toBeNull();
+  });
+
+  it("appears on Discover cards, and hiding it removes it there", async () => {
+    const viewer = await createUser({ name: "Viewer", gender: "MAN", interestedIn: ["WOMAN"], intentions: ["SINGLE"] });
+    const shown = await createUser({ name: "Shown", gender: "WOMAN", interestedIn: ["MAN"], intentions: ["SINGLE"] });
+    const V = await loginAs(viewer);
+    const card = async () => JSON.stringify((await V.get("/api/discovery")).body.data);
+    expect(await card()).toContain('"zodiac":{"name"');
+    await (await loginAs(shown)).patch("/api/settings").send({ showZodiacSign: false }).expect(200);
+    expect(await card()).not.toContain('"zodiac":{"name"');
   });
 
   it("does not apply to long-term-only members", async () => {
@@ -47,12 +58,11 @@ describe("zodiac", () => {
     expect((await p.A.get("/api/settings")).body.data.zodiac).toBeNull();
   });
 
-  it("shows the pair card only when both people opted in", async () => {
+  it("shows the pair card only while both people show their sign", async () => {
     const p = await pair();
-    await p.A.patch("/api/settings").send({ showZodiacSign: true }).expect(200);
-    expect((await p.A.get(`/api/matches/${p.id}/zodiac`)).body.data).toBeNull();
-    await p.B.patch("/api/settings").send({ showZodiacSign: true }).expect(200);
     expect((await p.A.get(`/api/matches/${p.id}/zodiac`)).body.data.line).toBeTruthy();
+    await p.B.patch("/api/settings").send({ showZodiacSign: false }).expect(200);
+    expect((await p.A.get(`/api/matches/${p.id}/zodiac`)).body.data).toBeNull();
   });
 });
 
