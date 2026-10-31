@@ -136,8 +136,8 @@ async function seedDev() {
         profile: { create: { displayName: name, gender: "OTHER", interestedIn: [], isPublished: false, isDiscoverable: false } },
       },
     });
-  await staff("admin@knot.test", "ADMIN", "Knot Admin");
-  await staff("moderator@knot.test", "MODERATOR", "Knot Moderator");
+  await staff("admin@knot.test", "ADMIN", "Mavelle Admin");
+  await staff("moderator@knot.test", "MODERATOR", "Mavelle Moderator");
   const expert = await staff("expert@knot.test", "EXPERT", "Leela Rao");
   await prisma.expertProfile.create({
     data: {
@@ -145,7 +145,7 @@ async function seedDev() {
       headline: "Relationship coach focused on communication",
       bio: "I help people put words to what they want from dating, notice patterns, and prepare for honest conversations. I am a coach, not a therapist, and I don't offer clinical advice.",
       experienceYears: 9,
-      credentials: "Certified relationship coach (self-declared, not yet verified by Knot)",
+      credentials: "Certified relationship coach (self-declared, not yet verified by Mavelle)",
       specialties: ["Communication", "Readiness for commitment", "Boundaries"],
       status: "APPROVED",
       decidedAt: now,
@@ -206,7 +206,7 @@ async function seedDemoStories() {
 }
 
 async function main() {
-  console.log("Seeding Knot…");
+  console.log("Seeding Mavelle…");
   await seedReference(prisma);
   if (process.env.NODE_ENV === "production") console.log("  NODE_ENV=production: skipping development members");
   else {

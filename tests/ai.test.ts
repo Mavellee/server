@@ -14,7 +14,7 @@ const disabled: AIProvider = { name: "none", enabled: false, generate: async () 
 beforeEach(resetDb);
 afterEach(() => setProvider(disabled));
 
-describe("Knot AI", () => {
+describe("Mavelle AI", () => {
   it("works with no AI configured by returning labelled curated suggestions", async () => {
     setProvider(disabled);
     const s = await loginAs(await createUser());
@@ -37,7 +37,7 @@ describe("Knot AI", () => {
 
     const res = await sa.post("/api/ai/suggest", { feature: "conversation_starter", matchId });
     expect(res.body.data.source).toBe("ai");
-    expect(res.body.data.label).toMatch(/Knot AI/);
+    expect(res.body.data.label).toMatch(/Mavelle AI/);
     expect(res.body.data.suggestions[0]).toBe("What's your favourite hike?");
     expect(res.body.data.suggestions.join("").length).toBeLessThanOrEqual(600);
     // Private chats are never sent to the AI.

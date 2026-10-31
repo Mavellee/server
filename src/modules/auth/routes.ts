@@ -44,7 +44,7 @@ authRouter.post("/register", authLimiter, async (req, res) => {
   const body = parse(registerSchema, req.body);
   // Age is always computed on the server from the date of birth.
   if (ageFrom(body.dateOfBirth) < 18) {
-    throw new ApiError(422, "UNDERAGE", "Knot is only for adults aged 18 and over.");
+    throw new ApiError(422, "UNDERAGE", "Mavelle is only for adults aged 18 and over.");
   }
   const existing = await prisma.user.findUnique({ where: { email: body.email } });
   if (existing) throw new ApiError(409, "EMAIL_TAKEN", "An account with this email already exists. Try logging in.");

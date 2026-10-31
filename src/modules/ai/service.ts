@@ -14,7 +14,7 @@ export interface Suggestion {
 }
 
 const SYSTEM = [
-  "You are Knot AI, an optional, gentle helper inside a dating app for adults.",
+  "You are Mavelle AI, an optional, gentle helper inside a dating app for adults.",
   "Write short, warm, respectful suggestions. Never be sexual, manipulative or pushy.",
   "Never claim to know whether two people are compatible, never diagnose a relationship,",
   "never encourage anyone to keep chatting or to buy anything.",
@@ -68,7 +68,7 @@ export interface FeatureInput {
 export async function suggest(userId: string, input: FeatureInput): Promise<Suggestion> {
   const fallback = (note?: string): Suggestion => ({
     source: "curated",
-    label: "Suggestions from the Knot team",
+    label: "Suggestions from the Mavelle team",
     suggestions: input.fallback,
     note: note ?? input.note,
   });
@@ -84,7 +84,7 @@ export async function suggest(userId: string, input: FeatureInput): Promise<Sugg
   const usage = await usageToday(userId);
   if (usage.mine >= usage.userLimit || usage.global >= usage.globalLimit) {
     await log("RATE_LIMITED");
-    return fallback("You've reached today's Knot AI limit, so here are some of our favourites instead.");
+    return fallback("You've reached today's Mavelle AI limit, so here are some of our favourites instead.");
   }
   if (inFlight >= config.ai.maxConcurrency) {
     await log("FALLBACK");
@@ -100,7 +100,7 @@ export async function suggest(userId: string, input: FeatureInput): Promise<Sugg
     const suggestions = parseSuggestions(result.text, config.ai.maxOutputChars);
     if (!suggestions.length) throw new Error("empty AI output");
     await log("OK", { outputChars: suggestions.join("\n").length, latencyMs: Date.now() - started, model: result.model });
-    return { source: "ai", label: "Suggested by Knot AI — edit or ignore freely", suggestions, note: input.note };
+    return { source: "ai", label: "Suggested by Mavelle AI — edit or ignore freely", suggestions, note: input.note };
   } catch (err) {
     logger.warn({ feature: input.feature, provider: provider.name, reason: (err as Error).name }, "AI request failed, using curated fallback");
     await log("ERROR", { latencyMs: Date.now() - started });

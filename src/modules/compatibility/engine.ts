@@ -1,5 +1,5 @@
 /**
- * Knot compatibility engine — deterministic and explainable.
+ * Mavelle compatibility engine — deterministic and explainable.
  *
  * It compares only what two people explicitly told us: their relationship intentions,
  * their interests and the optional questions they chose to answer. It never looks at photos

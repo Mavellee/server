@@ -1,4 +1,4 @@
-// Knot data model. Pair tables store userAId < userBId so one pair = one row.
+// Mavelle data model. Pair tables store userAId < userBId so one pair = one row.
 // Locations are rounded (2 decimals ≈ 1 km) before they are stored; exact coordinates are never kept.
 
 generator client {

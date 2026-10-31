@@ -196,7 +196,7 @@ export const GAMES: G[] = [
       "Name a place you'd both love to visit, and why.",
     ],
   },
-  // Couple-only decks: served solely to pairs who are together on Knot.
+  // Couple-only decks: served solely to pairs who are together on Mavelle.
   {
     slug: "couple-know-me",
     category: "COUPLE_KNOW_ME",

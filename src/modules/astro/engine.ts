@@ -1,7 +1,7 @@
 import { Body, Ecliptic, GeoVector, MakeTime, SiderealTime } from "astronomy-engine";
 
 /**
- * Knot Astro calculation engine: real astronomy, never an LLM.
+ * Mavelle Astro calculation engine: real astronomy, never an LLM.
  * Positions come from astronomy-engine (MIT; VSOP87 planets, NOVAS-derived Moon), geocentric, apparent, ecliptic of date.
  * Sidereal conversion: Lahiri ayanamsa, 23.245524743° at JD 2435553.5 advanced by IAU 2006 general precession.
  * Rahu/Ketu: mean lunar node (Meeus). Houses: whole sign from the Lagna.

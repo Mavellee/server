@@ -23,5 +23,5 @@ for (const u of users) {
   await prisma.adminAuditLog.create({ data: { action: "user.purged", targetType: "User", targetId: u.id } });
 }
 console.log(`Purged ${users.length} account(s) past the ${DELETION_GRACE_DAYS}-day grace period.`);
-console.log(`Removed birth details for ${await purgeExpired()} member(s) past the Knot Astro retention period.`);
+console.log(`Removed birth details for ${await purgeExpired()} member(s) past the Mavelle Astro retention period.`);
 await prisma.$disconnect();

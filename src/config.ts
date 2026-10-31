@@ -27,7 +27,7 @@ const schema = z.object({
   SMTP_PORT: int(587),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  MAIL_FROM: z.string().default("Knot <hello@example.com>"),
+  MAIL_FROM: z.string().default("Mavelle <hello@example.com>"),
   AI_PROVIDER: z.enum(["none", "ollama", "openai-compatible", "openai", "gemini", "anthropic"]).default("none"),
   AI_MODEL: z.string().default("llama3.2:3b"),
   OLLAMA_URL: z.string().default("http://localhost:11434"),

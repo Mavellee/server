@@ -4,7 +4,7 @@ import type { MoonPlacement } from "./engine.js";
  * Ashtakoota (Guna Milan), the traditional 36-point North Indian method. Inputs: each person's Moon nakshatra, pada and
  * rashi. Tables follow the widely published North Indian convention; Vashya and Gana vary between schools, and these are
  * the saravali.de variants. Tara uses the classical rule (remainders 3, 5 and 7 of the nine-fold count are inauspicious).
- * It is an astrological tradition: not a scientific assessment, and nothing in Knot depends on the score.
+ * It is an astrological tradition: not a scientific assessment, and nothing in Mavelle depends on the score.
  * Validated against reference data in tests/astro.gunamilan.test.ts.
  */
 export const GUNA_METHOD = "ashtakoota-north-1";

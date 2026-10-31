@@ -9,7 +9,7 @@ const app = createApp();
 const http = createServer(app);
 const io = createSocketServer(http);
 
-http.listen(config.port, () => logger.info({ port: config.port, env: config.env, ai: config.ai.provider }, "Knot API listening"));
+http.listen(config.port, () => logger.info({ port: config.port, env: config.env, ai: config.ai.provider }, "Mavelle API listening"));
 
 async function shutdown(signal: string) {
   logger.info({ signal }, "shutting down");

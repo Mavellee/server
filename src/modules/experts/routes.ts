@@ -18,7 +18,7 @@ const OPEN_STATUSES = ["PENDING", "IN_REVIEW", "INFO_REQUESTED"] as const;
 function publicExpert(e: Prisma.ExpertProfileGetPayload<{ include: { user: { select: { profile: { select: { displayName: true } } } } } }>) {
   return {
     userId: e.userId,
-    displayName: e.user.profile?.displayName ?? "Knot expert",
+    displayName: e.user.profile?.displayName ?? "Mavelle expert",
     headline: e.headline,
     bio: e.bio,
     experienceYears: e.experienceYears,

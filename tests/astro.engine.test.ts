@@ -10,7 +10,7 @@ const load = (f: string) => JSON.parse(readFileSync(new URL(`./fixtures/${f}`, i
 const diff = (a: number, b: number) => Math.abs(((a - b + 540) % 360) - 180);
 
 describe("calculation engine", () => {
-  // Reference values generated with Swiss Ephemeris 2.10 (Moshier, Lahiri), a tool not shipped with Knot.
+  // Reference values generated with Swiss Ephemeris 2.10 (Moshier, Lahiri), a tool not shipped with Mavelle.
   const rows: { utc: string; lat: number; lon: number; pos: Record<string, number>; asc: number; ayan: number }[] = load("astro-swiss-reference.json");
   it("matches Swiss Ephemeris to within 0.01° for every body, the ascendant and the ayanamsa", () => {
     for (const r of rows) {

@@ -26,7 +26,7 @@ export function zodiacSign(dateOfBirth: Date) {
   return { name: sign.name, symbol: `${sign.symbol}\uFE0E`, element: sign.element }; // text style, not the purple emoji
 }
 
-/** The badge is for casual and dating. Long-term-only members have Knot Astro instead. */
+/** The badge is for casual and dating. Long-term-only members have Mavelle Astro instead. */
 export const zodiacApplies = (intentions: Intention[]) => intentions.some((i) => i !== "MARRIAGE");
 
 const PAIRS: Record<string, { line: string; starter: string }> = {

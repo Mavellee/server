@@ -32,8 +32,8 @@ async function loadMatch(userId: string, matchId: string) {
 }
 
 const assertEligible = async (a: string, b: string) => {
-  if (!(await astroEligible(a, b))) throw new ApiError(403, "ASTRO_NOT_ELIGIBLE", "Knot Astro is only for matches where both people are looking for a long-term relationship or marriage.");
-  if (!cipherReady()) throw new ApiError(503, "ASTRO_NOT_CONFIGURED", "Knot Astro isn't available right now. Your match and chat aren't affected.");
+  if (!(await astroEligible(a, b))) throw new ApiError(403, "ASTRO_NOT_ELIGIBLE", "Mavelle Astro is only for matches where both people are looking for a long-term relationship or marriage.");
+  if (!cipherReady()) throw new ApiError(503, "ASTRO_NOT_CONFIGURED", "Mavelle Astro isn't available right now. Your match and chat aren't affected.");
 };
 
 function tell(session: { matchId: string; status: string }, ids: string[]) {
@@ -70,7 +70,7 @@ export async function optIn(userId: string, matchId: string) {
   const mine = match.astroSession?.consents.find((c) => c.userId === userId);
   if (mine?.state === "CONSENTED") return stateFor(userId, matchId);
   await setConsent(userId, matchId, otherId, "INTERESTED");
-  await notify(otherId, "MATCH", "An invitation from Knot Astro", "Your match would like to explore your charts together. It's entirely optional, and your chat is open either way.", { matchId, conversationId: match.conversation?.id });
+  await notify(otherId, "MATCH", "An invitation from Mavelle Astro", "Your match would like to explore your charts together. It's entirely optional, and your chat is open either way.", { matchId, conversationId: match.conversation?.id });
   return stateFor(userId, matchId);
 }
 

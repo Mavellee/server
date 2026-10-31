@@ -1,4 +1,4 @@
-# Knot API — production image. Build from the repository root:
+# Mavelle API — production image. Build from the repository root:
 #   docker build -f server/Dockerfile -t knot-api .
 FROM node:22-alpine AS build
 WORKDIR /app

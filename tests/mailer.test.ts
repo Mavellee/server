@@ -5,7 +5,7 @@ import { logger } from "../src/logger.js";
 afterEach(() => vi.restoreAllMocks());
 
 describe("email without SMTP", () => {
-  const mail = { to: "person@example.com", subject: "Confirm your email for Knot", text: "Open http://x/verify-email?token=SECRET-TOKEN-123" };
+  const mail = { to: "person@example.com", subject: "Confirm your email for Mavelle", text: "Open http://x/verify-email?token=SECRET-TOKEN-123" };
 
   it("in production never logs the message body (live account tokens) or keeps emails in memory", async () => {
     const error = vi.spyOn(logger, "error").mockImplementation(() => undefined as never);

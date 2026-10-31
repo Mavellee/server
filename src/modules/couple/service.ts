@@ -59,7 +59,7 @@ export async function request(userId: string, matchId: string) {
       if (r.requestedById === userId) return false;
       throw conflict("They've already asked you. Accept their request instead.");
     }
-    if (await togetherElsewhere(tx, userId, matchId)) throw conflict("You're already together with someone on Knot. End that first.");
+    if (await togetherElsewhere(tx, userId, matchId)) throw conflict("You're already together with someone on Mavelle. End that first.");
     // Same wording for both, so this never reveals the other person's status or that they said no.
     const unavailable = "This request can't be sent right now.";
     if (await togetherElsewhere(tx, otherId, matchId)) throw conflict(unavailable);
@@ -84,7 +84,7 @@ export async function accept(userId: string, matchId: string) {
     await lockPeople(tx, [userId, otherId]);
     const r = await tx.relationship.findUnique({ where: { matchId } });
     if (r?.status !== "PENDING" || r.requestedById === userId) throw conflict("There's no request to accept.");
-    if (await togetherElsewhere(tx, userId, matchId)) throw conflict("You're already together with someone on Knot. End that first.");
+    if (await togetherElsewhere(tx, userId, matchId)) throw conflict("You're already together with someone on Mavelle. End that first.");
     if (await togetherElsewhere(tx, otherId, matchId)) throw conflict("This request isn't available any more.");
     const now = new Date();
     await tx.relationship.update({ where: { matchId }, data: { status: "ACTIVE", startedAt: now } });
@@ -125,7 +125,7 @@ async function close(userId: string, match: { id: string; userAId: string; userB
 
 export async function end(userId: string, matchId: string) {
   const match = await activeMatch(userId, matchId);
-  if (match.relationship?.status !== "ACTIVE") throw conflict("You're not together on Knot right now.");
+  if (match.relationship?.status !== "ACTIVE") throw conflict("You're not together on Mavelle right now.");
   await close(userId, match);
   await notify(otherIn(match, userId), "MATCH", "Your couple space has closed", "You're hidden from Discover until you choose to come back. You can change that in Settings.", { matchId, conversationId: match.conversation?.id });
   return stateFor(userId, matchId);
