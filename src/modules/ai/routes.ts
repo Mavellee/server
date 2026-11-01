@@ -39,6 +39,26 @@ async function pairContext(me: string, otherId: string) {
   return { mine, theirs, shared };
 }
 
+// How each compared answer reads inside a sentence. Only the topic is named, never anyone's answer.
+const EXPLAIN_TOPIC: Record<string, string> = {
+  intentions: "the kind of relationship you want",
+  interests: "the things you enjoy",
+  children: "children",
+  pace: "the pace of dating",
+  conflict: "handling arguments",
+  texting: "staying in touch",
+  feelings: "sharing feelings",
+  weekends: "weekends",
+  smoking: "smoking",
+  drinking: "drinking",
+  mornings: "mornings and late nights",
+  family: "family",
+  money: "money",
+  space: "personal space",
+  ambition: "career",
+};
+const listOf = (t: string[]) => (t.length > 1 ? `${t.slice(0, -1).join(", ")} and ${t[t.length - 1]}` : (t[0] ?? ""));
+
 const schema = z.discriminatedUnion("feature", [
   z.object({ feature: z.literal("conversation_starter"), matchId: z.string().uuid() }),
   z.object({ feature: z.literal("icebreaker"), userId: z.string().uuid() }),
@@ -103,13 +123,14 @@ aiRouter.post("/suggest", async (req, res) => {
       await pairContext(me, body.userId);
       const result = await compatibilityFor(me, body.userId);
       if (!result) throw badRequest("Not enough information to explain yet.");
-      const aligned = result.items.filter((i) => i.status === "aligned").map((i) => i.label);
-      const different = result.items.filter((i) => i.status === "different").map((i) => i.label);
+      const topic = (i: { key: string; label: string }) => EXPLAIN_TOPIC[i.key] ?? i.label;
+      const aligned = result.items.filter((i) => i.status === "aligned").map(topic);
+      const different = result.items.filter((i) => i.status === "different").map(topic);
       const missing = result.items.filter((i) => i.status.startsWith("missing")).length;
       const fallback = [
-        aligned.length ? `You line up on: ${aligned.slice(0, 3).join("; ")}.` : "You haven't lined up on any answered questions yet.",
-        different.length ? `You see things differently on: ${different.slice(0, 3).join("; ")}. That's worth a conversation, not a verdict.` : "No clear differences in the questions you've both answered.",
-        missing ? `${missing} question${missing === 1 ? " is" : "s are"} unanswered by one of you, so this picture is incomplete.` : "This is based only on what you've both chosen to share.",
+        aligned.length ? `You two are on the same page about ${listOf(aligned.slice(0, 3))}.` : "You're still finding out where you line up.",
+        different.length ? `You may see ${listOf(different.slice(0, 3))} a little differently, and that's a lovely thing to talk about.` : "Nothing stands out as a difference so far.",
+        missing ? `${missing === 1 ? "One answer is" : `${missing} answers are`} still missing, so there's more to discover.` : "All of this comes from what you've both chosen to share.",
       ];
       // The AI may only rephrase the deterministic result; it cannot change the score or the user's preferences.
       return ok(
@@ -118,7 +139,7 @@ aiRouter.post("/suggest", async (req, res) => {
           feature: "explain_compatibility",
           prompt: `In plain, kind language, explain this compatibility summary in 3 short lines. Do not change or invent anything, do not give a verdict. Aligned: ${aligned.join("; ") || "none"}. Different: ${different.join("; ") || "none"}. Unanswered: ${missing}.`,
           fallback,
-          note: "Compatibility reflects stated preferences only and does not predict how a relationship will go.",
+          note: "A gentle guide only. It does not predict how a relationship will go.",
         }),
       );
     }
