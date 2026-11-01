@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx --env-file-if-exists=.env prisma/seed.ts",
+    "db:seed:extra": "tsx --env-file-if-exists=.env prisma/seed-extra.ts",
     "db:purge-deleted": "tsx --env-file-if-exists=.env src/scripts/purgeDeleted.ts"
   },
   "dependencies": {
