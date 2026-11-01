@@ -99,7 +99,7 @@ export async function likeUser(fromId: string, toId: string, detail?: LikeDetail
     const names = await prisma.profile.findMany({ where: { userId: { in: [fromId, toId] } }, select: { userId: true, displayName: true } });
     const nameOf = (id: string) => names.find((n) => n.userId === id)?.displayName ?? "Someone";
     for (const [me, other] of [[fromId, toId], [toId, fromId]]) {
-      await notify(me, "MATCH", `You and ${nameOf(other)} liked each other`, "Say hello when you're ready — there's no rush.", {
+      await notify(me, "MATCH", `You and ${nameOf(other)} liked each other`, "Your chat is open. Say hello when you're ready.", {
         matchId: result.matchId,
         conversationId: result.conversationId,
       });

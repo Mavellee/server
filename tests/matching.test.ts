@@ -24,6 +24,24 @@ describe("likes and matches", () => {
     expect((await sa.get("/api/matches")).body.data).toHaveLength(1);
   });
 
+  it("keeps a like under You liked only while it is one-sided", async () => {
+    const a = await createUser();
+    const b = await createUser();
+    const sa = await loginAs(a);
+    const sb = await loginAs(b);
+    await sa.post("/api/likes", { userId: b.id });
+    const waiting = (await sa.get("/api/likes/sent")).body.data;
+    expect(waiting.map((l: { profile: { id: string } }) => l.profile.id)).toEqual([b.id]);
+
+    await sb.post("/api/likes", { userId: a.id });
+    expect((await sa.get("/api/likes/sent")).body.data).toEqual([]);
+    expect((await sb.get("/api/likes/sent")).body.data).toEqual([]);
+    const notes = (await sa.get("/api/notifications")).body.data.items;
+    expect(notes[0]).toMatchObject({ type: "MATCH" });
+    expect(notes[0].data.conversationId).toBeTruthy();
+    expect((await sa.get("/api/conversations")).body.data).toHaveLength(1);
+  });
+
   it("does not duplicate likes or matches", async () => {
     const a = await createUser();
     const b = await createUser();

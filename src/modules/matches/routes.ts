@@ -59,9 +59,15 @@ likesRouter.get("/received", async (req, res) => {
 
 likesRouter.get("/sent", async (req, res) => {
   const me = req.user!.id;
-  const blocked = await blockedUserIds(me);
+  // Only people still waiting: once they like back (or a match existed, even an ended one) they leave this list.
+  const [blocked, likedMe, matches] = await Promise.all([
+    blockedUserIds(me),
+    prisma.like.findMany({ where: { toUserId: me }, select: { fromUserId: true } }),
+    prisma.match.findMany({ where: { OR: [{ userAId: me }, { userBId: me }] }, select: { userAId: true, userBId: true } }),
+  ]);
+  const exclude = [...blocked, ...likedMe.map((l) => l.fromUserId), ...matches.map((m) => (m.userAId === me ? m.userBId : m.userAId))];
   const likes = await prisma.like.findMany({
-    where: { fromUserId: me, toUserId: { notIn: [...blocked] }, to: { status: "ACTIVE", profile: { isPublished: true } } },
+    where: { fromUserId: me, toUserId: { notIn: exclude }, to: { status: "ACTIVE", profile: { isPublished: true } } },
     include: { to: { include: publicProfileInclude } },
     orderBy: { createdAt: "desc" },
     take: 50,
