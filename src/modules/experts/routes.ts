@@ -7,6 +7,7 @@ import { notify } from "../../lib/notify.js";
 import { ageFrom } from "../../lib/age.js";
 import { requireActive } from "../../middleware/auth.js";
 import { sensitiveLimiter } from "../../middleware/security.js";
+import { writeExpertReview } from "../ai/service.js";
 import { compatibilityFor } from "../compatibility/service.js";
 
 export const expertsRouter = Router();
@@ -156,11 +157,27 @@ expertsRouter.post("/requests", sensitiveLimiter, async (req, res) => {
       consentedAt: new Date(),
     },
   });
-  ok(res, request, 201);
+  ok(res, { ...request, status: await tryAiReview(request.id, userId, body, data) }, 201);
 });
 
+/**
+ * Mavelle AI answers first, from the same consented snapshot an expert would see (minus the name).
+ * When it can't, the request simply stays in the experts' queue.
+ */
+async function tryAiReview(id: string, userId: string, body: { topic: string; question: string }, data: Record<string, unknown>) {
+  const { displayName: _name, ...profile } = (data.profile ?? {}) as Record<string, unknown>;
+  const message = await writeExpertReview(userId, { topic: body.topic, question: body.question, shared: { ...data, ...(data.profile ? { profile } : {}) } });
+  if (!message) return "PENDING" as const;
+  // Atomic: if an expert claimed it or the member cancelled meanwhile, their action stands.
+  const { count } = await prisma.expertReviewRequest.updateMany({ where: { id, status: "PENDING", expertId: null }, data: { status: "COMPLETED", completedAt: new Date() } });
+  if (count !== 1) return (await prisma.expertReviewRequest.findUniqueOrThrow({ where: { id } })).status;
+  await prisma.expertReview.create({ data: { requestId: id, action: "COMPLETED", message, aiWritten: true } });
+  await notify(userId, "EXPERT_UPDATE", "Your AI review is ready", undefined, { requestId: id });
+  return "COMPLETED" as const;
+}
+
 const historyInclude = {
-  reviews: { orderBy: { createdAt: "asc" }, select: { id: true, action: true, message: true, createdAt: true, authorId: true } },
+  reviews: { orderBy: { createdAt: "asc" }, select: { id: true, action: true, message: true, aiWritten: true, createdAt: true, authorId: true } },
   expert: { select: { profile: { select: { displayName: true } } } },
 } satisfies Prisma.ExpertReviewRequestInclude;
 

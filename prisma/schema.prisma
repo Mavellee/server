@@ -655,6 +655,7 @@ model ExpertReview {
   authorId  String?             @db.Uuid
   action    ExpertReviewAction
   message   String?
+  aiWritten Boolean             @default(false)
   createdAt DateTime            @default(now())
   request   ExpertReviewRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   author    User?               @relation(fields: [authorId], references: [id], onDelete: SetNull)
