@@ -88,7 +88,7 @@ export async function sendVerificationEmail(userId: string, email: string) {
   await mailer.send({
     to: email,
     subject: "Confirm your email for Mavelle",
-    text: `Welcome to Mavelle.\n\nConfirm your email address to start meeting people:\n${config.appOrigin}/verify-email?token=${token}\n\nThis link expires in 24 hours. If you did not create an account, you can ignore this email.`,
+    text: `Welcome to Mavelle.\n\nConfirm your email address to start meeting people:\n${config.appOrigin}/verify-email#token=${token}\n\nThis link expires in 24 hours. If you did not create an account, you can ignore this email.`,
   });
 }
 
@@ -97,7 +97,7 @@ export async function sendPasswordResetEmail(userId: string, email: string) {
   await mailer.send({
     to: email,
     subject: "Reset your Mavelle password",
-    text: `Someone asked to reset the password for your Mavelle account.\n\nChoose a new password here:\n${config.appOrigin}/reset-password?token=${token}\n\nThis link expires in 1 hour. If this was not you, you can ignore this email; your password will not change.`,
+    text: `Someone asked to reset the password for your Mavelle account.\n\nChoose a new password here:\n${config.appOrigin}/reset-password#token=${token}\n\nThis link expires in 1 hour. If this was not you, you can ignore this email; your password will not change.`,
   });
 }
 

@@ -31,6 +31,7 @@ describe("registration", () => {
     expect((await s.get("/api/discovery")).status).toBe(403);
 
     const mail = outbox.filter((m) => m.to === body.email).at(-1)!;
+    expect(mail.text).toContain("/verify-email#token="); // fragment: never sent to a server or logged
     const verify = await s.post("/api/auth/verify-email", { token: tokenFrom(mail.text) });
     expect(verify.status).toBe(200);
     expect((await s.get("/api/auth/me")).body.data.status).toBe("ACTIVE");
@@ -82,7 +83,9 @@ describe("login and sessions", () => {
     expect(forgot.status).toBe(200);
     // Unknown emails get the same response.
     expect((await anon().post("/api/auth/forgot-password", { email: "ghost@knot.test" })).body).toEqual(forgot.body);
-    const token = tokenFrom(outbox.filter((m) => m.to === u.email).at(-1)!.text);
+    const resetMail = outbox.filter((m) => m.to === u.email).at(-1)!.text;
+    expect(resetMail).toContain("/reset-password#token=");
+    const token = tokenFrom(resetMail);
     expect((await anon().post("/api/auth/reset-password", { token, password: "BrandNewPass1" })).status).toBe(200);
     expect((await s.get("/api/auth/me")).status).toBe(401);
     expect((await anon().post("/api/auth/reset-password", { token, password: "AnotherPass22" })).status).toBe(400);
