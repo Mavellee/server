@@ -81,6 +81,11 @@ enum CompatibilityDimension {
   VALUES
 }
 
+enum LocationSource {
+  DEVICE
+  MANUAL
+}
+
 enum ExpertStatus {
   PENDING
   APPROVED
@@ -288,24 +293,29 @@ model UserSettings {
 // ---------- PROFILE ----------
 
 model Profile {
-  userId            String    @id @db.Uuid
+  userId            String          @id @db.Uuid
   displayName       String
   gender            Gender
   interestedIn      Gender[]
   bio               String?
   city              String?
-  latitude          Decimal?  @db.Decimal(5, 2)
-  longitude         Decimal?  @db.Decimal(5, 2)
+  latitude          Decimal?        @db.Decimal(5, 2)
+  longitude         Decimal?        @db.Decimal(5, 2)
+  // Where the location came from, which listed place it is (manual), and when. Device positions need consent.
+  locationSource    LocationSource?
+  placeId           String?
+  locationUpdatedAt DateTime?
+  locationConsentAt DateTime?
   languages         String[]
-  ageMin            Int       @default(18)
-  ageMax            Int       @default(60)
+  ageMin            Int             @default(18)
+  ageMax            Int             @default(60)
   maxDistanceKm     Int? // null = anywhere
-  isPublished       Boolean   @default(false)
-  isDiscoverable    Boolean   @default(true) // privacy: appear in others' Discover
+  isPublished       Boolean         @default(false)
+  isDiscoverable    Boolean         @default(true) // privacy: appear in others' Discover
   discoveryPausedAt DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([isPublished, isDiscoverable, gender])
   @@index([latitude, longitude])
@@ -460,22 +470,22 @@ model Pass {
 }
 
 model Match {
-  id           String        @id @default(uuid()) @db.Uuid
-  userAId      String        @db.Uuid
-  userBId      String        @db.Uuid
-  status       MatchStatus   @default(ACTIVE)
-  endedById    String?       @db.Uuid
-  endedAt      DateTime?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  userA        User          @relation("MatchA", fields: [userAId], references: [id], onDelete: Cascade)
-  userB        User          @relation("MatchB", fields: [userBId], references: [id], onDelete: Cascade)
-  conversation Conversation?
-  gameSessions GameSession[]
-  astroSession AstroSession?
-  relationship Relationship?
+  id            String         @id @default(uuid()) @db.Uuid
+  userAId       String         @db.Uuid
+  userBId       String         @db.Uuid
+  status        MatchStatus    @default(ACTIVE)
+  endedById     String?        @db.Uuid
+  endedAt       DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  userA         User           @relation("MatchA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB         User           @relation("MatchB", fields: [userBId], references: [id], onDelete: Cascade)
+  conversation  Conversation?
+  gameSessions  GameSession[]
+  astroSession  AstroSession?
+  relationship  Relationship?
   friendReviews FriendReview[]
-  doodles      Doodle[]
+  doodles       Doodle[]
 
   @@unique([userAId, userBId])
   @@index([userAId, status])

@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Gender, Intention } from "@prisma/client";
+import { Gender, Intention, type Prisma } from "@prisma/client";
 import { prisma } from "../../db.js";
 import { ApiError, badRequest, notFound, ok, parse } from "../../lib/http.js";
 import { CITIES, findCity } from "../../lib/cities.js";
 import { MAX_PROMPT_ANSWER, MAX_PROMPTS, PROMPTS, promptText } from "../../lib/prompts.js";
 import { roundCoord } from "../../lib/geo.js";
+import { PLACES } from "../astro/places.js";
 import { isBlockedBetween } from "../../lib/safety.js";
 import { ageFrom } from "../../lib/age.js";
 import { requireActive, requireAuth } from "../../middleware/auth.js";
@@ -100,12 +101,17 @@ profilesRouter.patch("/me", async (req, res) => {
   const ageMax = body.ageMax ?? existing?.ageMax ?? 60;
   if (ageMax < ageMin) throw new ApiError(422, "VALIDATION_FAILED", "Some fields need attention.", { ageMax: ["Maximum age must be at least the minimum age."] });
 
-  let coords: { latitude: number | null; longitude: number | null } | undefined;
+  // Older clients still send city / approxLocation here; record the source the same way /api/location does.
+  let coords: Pick<Prisma.ProfileUncheckedCreateInput, "latitude" | "longitude" | "placeId" | "locationSource" | "locationUpdatedAt" | "locationConsentAt"> | undefined;
   if (body.approxLocation) {
-    coords = { latitude: roundCoord(body.approxLocation.lat), longitude: roundCoord(body.approxLocation.lon) };
+    const now = new Date();
+    coords = { latitude: roundCoord(body.approxLocation.lat), longitude: roundCoord(body.approxLocation.lon), locationSource: "DEVICE", locationUpdatedAt: now, locationConsentAt: now };
   } else if (body.city !== undefined) {
     const city = body.city ? findCity(body.city) : undefined;
-    coords = city ? { latitude: city.lat, longitude: city.lon } : { latitude: null, longitude: null };
+    const placeId = city ? (PLACES.find((pl) => pl.city === city.name)?.id ?? null) : null;
+    coords = city
+      ? { latitude: city.lat, longitude: city.lon, placeId, locationSource: "MANUAL", locationUpdatedAt: new Date(), locationConsentAt: null }
+      : { latitude: null, longitude: null, placeId: null, locationSource: null, locationUpdatedAt: null, locationConsentAt: null };
   }
 
   let interestIds: string[] | undefined;

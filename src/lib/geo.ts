@@ -18,10 +18,18 @@ export function boundingBox(lat: number, lon: number, km: number) {
   return { minLat: lat - dLat, maxLat: lat + dLat, minLon: lon - dLon, maxLon: lon + dLon };
 }
 
-/** Distance shown to other users: coarse buckets, never exact. */
+/** Discover radius choices, in km. */
+export const RADIUS_OPTIONS = [5, 10, 25, 50, 100] as const;
+
+/**
+ * Distance shown to other users: the same coarse bands as the radius choices, never a number of its own.
+ * Combined with ~1 km rounding and limited location changes, this keeps anyone's position from being worked out.
+ */
 export function approxDistanceLabel(km: number): string {
-  if (km < 2) return "Less than 2 km away";
-  if (km < 10) return `About ${Math.round(km)} km away`;
-  if (km < 100) return `About ${Math.round(km / 5) * 5} km away`;
+  if (km < 5) return "Within 5 km";
+  if (km < 10) return "Around 10 km away";
+  if (km < 25) return "Around 25 km away";
+  if (km < 50) return "Around 50 km away";
+  if (km < 100) return "Around 100 km away";
   return "More than 100 km away";
 }

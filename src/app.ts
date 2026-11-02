@@ -25,6 +25,7 @@ import { adminRouter } from "./modules/admin/routes.js";
 import { astroRouter } from "./modules/astro/routes.js";
 import { coupleRouter } from "./modules/couple/routes.js";
 import { friendReviewRouter } from "./modules/friendreview/routes.js";
+import { locationRouter } from "./modules/location/routes.js";
 
 export function createApp() {
   const app = express();
@@ -78,6 +79,7 @@ export function createApp() {
   api.use("/astro", astroRouter);
   api.use("/couple", coupleRouter);
   api.use("/friend-reviews", friendReviewRouter);
+  api.use("/location", locationRouter);
   api.use(notFoundHandler);
 
   app.use("/api", api);

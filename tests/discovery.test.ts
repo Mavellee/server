@@ -57,7 +57,7 @@ describe("discovery filters", () => {
     await createUser({ name: "Mumbai", gender: "MAN", interestedIn: ["WOMAN"], lat: 19.08, lon: 72.88 });
     const res = await (await loginAs(me)).get("/api/discovery");
     expect(names(res)).toEqual(["Gurugram"]);
-    expect(res.body.data.items[0].distance).toMatch(/km away/);
+    expect(res.body.data.items[0].distance).toBe("Around 25 km away"); // a band, never a number of its own
   });
 
   it("hides people already liked or passed, and pages with a cursor", async () => {
