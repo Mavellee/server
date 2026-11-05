@@ -4,7 +4,8 @@ import { z } from "zod";
 import { config } from "../config.js";
 import { logger } from "../logger.js";
 import { ApiError } from "../lib/http.js";
-import { SESSION_COOKIE, userForToken } from "../middleware/auth.js";
+import { userForAccessToken } from "../middleware/auth.js";
+import { ACCESS_COOKIE } from "../modules/auth/sessions.js";
 import { assertMember, markRead, sendMessage, MAX_MESSAGE_LENGTH } from "../modules/chat/service.js";
 import { prisma } from "../db.js";
 import { addStroke, assertTogether, undoStroke } from "../modules/couple/service.js";
@@ -39,6 +40,7 @@ const strokeInput = z.object({ doodleId: z.string().uuid(), stroke: z.object({ i
 const undoInput = z.object({ doodleId: z.string().uuid() });
 const liveInput = z.object({ matchId: z.string().uuid(), doodleId: z.string().uuid(), strokeId: z.string().min(6).max(40), ...brush, p: z.array(coord).min(2).max(200) });
 const MAX_LIVE_PER_SECOND = 40;
+const MAX_EVENTS_PER_10S = 100;
 
 export function createSocketServer(http: HttpServer) {
   const io = new Server(http, {
@@ -48,11 +50,13 @@ export function createSocketServer(http: HttpServer) {
     maxHttpBufferSize: 16 * 1024,
   });
 
-  // Same session cookie as the REST API; unauthenticated sockets are rejected.
+  // Same access token as the REST API: the web's HttpOnly cookie, or `auth.token` from a native app.
+  // Unauthenticated sockets are rejected; the client refreshes its token and reconnects.
   io.use(async (socket, next) => {
     const origin = socket.handshake.headers.origin;
     if (origin && origin !== config.appOrigin) return next(new Error("BAD_ORIGIN"));
-    const found = await userForToken(readCookie(socket.handshake.headers.cookie, SESSION_COOKIE)).catch(() => null);
+    const mobileToken = typeof socket.handshake.auth?.token === "string" ? socket.handshake.auth.token : undefined;
+    const found = await (mobileToken ? userForAccessToken(mobileToken, "mavelle-mobile") : userForAccessToken(readCookie(socket.handshake.headers.cookie, ACCESS_COOKIE), "mavelle-web")).catch(() => null);
     if (!found || found.user.status !== "ACTIVE") return next(new Error("UNAUTHENTICATED"));
     socket.data.userId = found.user.id;
     socket.data.sessionId = found.session.id;
@@ -65,13 +69,22 @@ export function createSocketServer(http: HttpServer) {
     socketConnected(userId);
     socket.on("disconnect", () => socketDisconnected(userId));
 
+    // Every handled event counts toward a per-socket budget, on top of each action's own limits.
+    let eventWindow = 0;
+    let eventCount = 0;
     const handle =
       <T>(schema: z.ZodSchema<T>, fn: (input: T) => Promise<unknown>) =>
       async (raw: unknown, ack?: Ack) => {
+        const now = Date.now();
+        if (now - eventWindow > 10_000) {
+          eventWindow = now;
+          eventCount = 0;
+        }
+        if (++eventCount > MAX_EVENTS_PER_10S) return ack?.({ ok: false, error: { code: "RATE_LIMITED", message: "Slow down a little." } });
         try {
           // Re-check the session on every action so logout/ban takes effect immediately.
           const s = await prisma.session.findUnique({ where: { id: socket.data.sessionId }, include: { user: { select: { status: true } } } });
-          if (!s || s.revokedAt || s.expiresAt < new Date() || s.user.status !== "ACTIVE") {
+          if (!s || s.revokedAt || s.expiresAt < new Date() || (s.idleExpiresAt && s.idleExpiresAt < new Date()) || s.user.status !== "ACTIVE") {
             socket.disconnect(true);
             return;
           }

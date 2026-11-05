@@ -7,7 +7,7 @@ import { audit } from "../../lib/audit.js";
 import { notify } from "../../lib/notify.js";
 import { ageFrom } from "../../lib/age.js";
 import { requireRole } from "../../middleware/auth.js";
-import { revokeAllSessions } from "../auth/service.js";
+import { revokeAllSessions } from "../auth/sessions.js";
 import { endMatch } from "../matches/service.js";
 
 export const adminRouter = Router();
@@ -91,11 +91,12 @@ adminRouter.post("/users/:id/status", async (req, res) => {
   if (id === req.user!.id) throw badRequest("You can't change your own account status.");
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) throw notFound("User not found.");
-  if (user.role === "ADMIN" && req.user!.role !== "ADMIN") throw badRequest("Only admins can act on admin accounts.");
+  // Moderators act on members only; any staff account (moderator, expert, admin) needs an admin.
+  if (user.role !== "USER" && req.user!.role !== "ADMIN") throw badRequest("Only admins can act on staff accounts.");
 
   await prisma.user.update({ where: { id }, data: { status: body.status } });
   if (body.status !== "ACTIVE") {
-    await revokeAllSessions(id);
+    await revokeAllSessions(id, `ADMIN_${body.status}`);
     await prisma.profile.updateMany({ where: { userId: id }, data: { isPublished: false } });
     if (body.status === "BANNED") {
       const matches = await prisma.match.findMany({ where: { status: "ACTIVE", OR: [{ userAId: id }, { userBId: id }] } });

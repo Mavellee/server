@@ -5,6 +5,7 @@ declare global {
     interface Request {
       user?: { id: string; email: string; role: Role; status: AccountStatus; emailVerifiedAt: Date | null };
       sessionId?: string;
+      authVia?: "cookie" | "bearer";
     }
   }
 }

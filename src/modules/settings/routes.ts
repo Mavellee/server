@@ -5,9 +5,10 @@ import { prisma } from "../../db.js";
 import { ApiError, ok, parse } from "../../lib/http.js";
 import { requireAuth } from "../../middleware/auth.js";
 import { sensitiveLimiter } from "../../middleware/security.js";
-import { clearSessionCookie, revokeAllSessions, verifyPassword } from "../auth/service.js";
+import { verifyPassword } from "../auth/service.js";
+import { clearWebCookies, revokeAllSessions, revokeSession } from "../auth/sessions.js";
+import { securityEvent } from "../../lib/securityEvents.js";
 import { endMatch } from "../matches/service.js";
-import { disconnectSessions } from "../../realtime/bus.js";
 import { zodiacApplies, zodiacSign } from "../../lib/zodiac.js";
 
 export const DELETION_GRACE_DAYS = 30;
@@ -63,18 +64,27 @@ settingsRouter.post("/discovery", async (req, res) => {
 });
 
 settingsRouter.get("/sessions", async (req, res) => {
+  const now = new Date();
   const sessions = await prisma.session.findMany({
-    where: { userId: req.user!.id, revokedAt: null, expiresAt: { gt: new Date() } },
+    where: { userId: req.user!.id, revokedAt: null, expiresAt: { gt: now }, OR: [{ idleExpiresAt: null }, { idleExpiresAt: { gt: now } }] },
     orderBy: { lastUsedAt: "desc" },
-    select: { id: true, userAgent: true, createdAt: true, lastUsedAt: true },
+    select: { id: true, userAgent: true, client: true, createdAt: true, lastUsedAt: true },
   });
   ok(res, sessions.map((s) => ({ ...s, current: s.id === req.sessionId })));
 });
 
-settingsRouter.delete("/sessions/:id", async (req, res) => {
+/** Signing out another device asks for the password again, so a borrowed session can't lock the owner out. */
+settingsRouter.delete("/sessions/:id", sensitiveLimiter, async (req, res) => {
   const { id } = parse(z.object({ id: z.string().uuid() }), req.params);
-  const { count } = await prisma.session.updateMany({ where: { id, userId: req.user!.id }, data: { revokedAt: new Date() } });
-  if (count) disconnectSessions([id]);
+  const { password } = parse(z.object({ password: z.string().min(1).max(128) }), req.body ?? {});
+  const user = await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id } });
+  if (!(await verifyPassword(user.passwordHash, password))) throw new ApiError(401, "INVALID_CREDENTIALS", "That password is incorrect.");
+  const session = await prisma.session.findFirst({ where: { id, userId: user.id }, select: { id: true } });
+  if (session) {
+    await revokeSession(session.id, "REVOKED_BY_USER");
+    await securityEvent("SESSION_REVOKED", req, { userId: user.id, sessionId: session.id });
+    if (session.id === req.sessionId && req.authVia === "cookie") clearWebCookies(res);
+  }
   ok(res, { revoked: true });
 });
 
@@ -123,7 +133,8 @@ settingsRouter.post("/delete-account", sensitiveLimiter, async (req, res) => {
     prisma.profile.updateMany({ where: { userId }, data: { isPublished: false } }),
     prisma.expertReviewRequest.updateMany({ where: { requesterId: userId, status: { in: ["PENDING", "IN_REVIEW", "INFO_REQUESTED"] } }, data: { status: "CANCELLED" } }),
   ]);
-  await revokeAllSessions(userId);
-  clearSessionCookie(res);
+  await revokeAllSessions(userId, "ACCOUNT_DELETED");
+  await securityEvent("ACCOUNT_DELETION_REQUESTED", req, { userId });
+  clearWebCookies(res);
   ok(res, { scheduledFor: new Date(Date.now() + DELETION_GRACE_DAYS * 86400000) });
 });

@@ -250,19 +250,50 @@ model User {
   @@index([status, role])
 }
 
+// One signed-in device. Its refresh token rotates on every use; only hashes are stored.
+// The previous hash is kept so a reused (stolen) refresh token can be detected and the session closed.
 model Session {
-  id         String    @id @default(uuid()) @db.Uuid
-  userId     String    @db.Uuid
-  tokenHash  String    @unique
-  userAgent  String?
-  ip         String?
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  lastUsedAt DateTime  @default(now())
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String        @id @default(uuid()) @db.Uuid
+  userId              String        @db.Uuid
+  tokenHash           String?       @unique // legacy cookie session, swapped for tokens on first use
+  refreshHash         String?       @unique
+  previousRefreshHash String?       @unique
+  rotatedAt           DateTime?
+  idleExpiresAt       DateTime?
+  client              SessionClient @default(WEB)
+  userAgent           String?
+  ip                  String?
+  expiresAt           DateTime
+  revokedAt           DateTime?
+  revokedReason       String?
+  createdAt           DateTime      @default(now())
+  lastUsedAt          DateTime      @default(now())
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
+}
+
+enum SessionClient {
+  WEB
+  MOBILE
+}
+
+// Account security history: sign-ins, failures, resets, revocations. Never passwords or tokens.
+model SecurityEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  type      String
+  sessionId String?  @db.Uuid
+  emailHash String? // for attempts on unknown emails: correlates without storing the address
+  ip        String?
+  userAgent String?
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+  @@index([createdAt])
 }
 
 model AuthToken {

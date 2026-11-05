@@ -4,7 +4,7 @@ import { prisma } from "../src/db.js";
 import { mailer } from "../src/lib/mailer.js";
 import { anon, app, createUser, loginAs, ORIGIN, PASSWORD, resetDb } from "./helpers.js";
 
-const outbox = (mailer as unknown as { outbox: { to: string; text: string }[] }).outbox;
+const outbox = (mailer as unknown as { outbox: { to: string; subject: string; text: string }[] }).outbox;
 const tokenFrom = (text: string) => /token=([\w-]+)/.exec(text)![1];
 const dobForAge = (age: number) => {
   const d = new Date();
@@ -15,25 +15,27 @@ const valid = () => ({ email: `new${Date.now()}@example.com`, password: PASSWORD
 beforeEach(resetDb);
 
 describe("registration", () => {
-  it("creates a pending account, logs in, and sends a verification email", async () => {
+  it("creates a pending account without signing in, and the emailed link verifies and signs in", async () => {
     const s = anon();
     const body = valid();
     const res = await s.post("/api/auth/register", body);
-    expect(res.status).toBe(201);
-    expect(res.body.data).toMatchObject({ email: body.email, status: "PENDING_VERIFICATION", emailVerified: false, age: expect.any(Number) });
-    expect(res.body.data).not.toHaveProperty("passwordHash");
-    expect(res.headers["set-cookie"][0]).toMatch(/knot_session=.*HttpOnly.*SameSite=Lax/);
+    expect(res.status).toBe(202);
+    expect(res.body.data).toEqual({ checkEmail: true });
+    expect(res.headers["set-cookie"]).toBeUndefined();
 
     const user = await prisma.user.findUniqueOrThrow({ where: { email: body.email } });
     expect(user.passwordHash).toMatch(/^\$argon2id\$/);
+    expect(user.status).toBe("PENDING_VERIFICATION");
 
-    // Social features are locked until verification.
-    expect((await s.get("/api/discovery")).status).toBe(403);
+    // Signing in before verifying works, but social features stay locked.
+    const early = await loginAs(user);
+    expect((await early.get("/api/discovery")).status).toBe(403);
 
     const mail = outbox.filter((m) => m.to === body.email).at(-1)!;
     expect(mail.text).toContain("/verify-email#token="); // fragment: never sent to a server or logged
     const verify = await s.post("/api/auth/verify-email", { token: tokenFrom(mail.text) });
     expect(verify.status).toBe(200);
+    expect(([] as string[]).concat(verify.headers["set-cookie"]).join(";")).toMatch(/mv_access=.*HttpOnly/);
     expect((await s.get("/api/auth/me")).body.data.status).toBe("ACTIVE");
     // Tokens are single use.
     expect((await s.post("/api/auth/verify-email", { token: tokenFrom(mail.text) })).status).toBe(400);
@@ -51,11 +53,16 @@ describe("registration", () => {
     expect(Object.keys(res.body.error.details)).toEqual(expect.arrayContaining(["email", "password", "ageConfirmed"]));
   });
 
-  it("does not allow duplicate emails (case-insensitive)", async () => {
+  it("never reveals whether an email is registered, and tells the real owner instead", async () => {
     const body = valid();
-    await anon().post("/api/auth/register", body);
-    const res = await anon().post("/api/auth/register", { ...body, email: body.email.toUpperCase() });
-    expect(res.status).toBe(409);
+    const first = await anon().post("/api/auth/register", body);
+    const again = await anon().post("/api/auth/register", { ...body, email: body.email.toUpperCase(), password: "SomethingElse9" });
+    expect([first.status, again.status]).toEqual([202, 202]);
+    expect(again.body).toEqual(first.body);
+    expect(await prisma.user.count({ where: { email: body.email } })).toBe(1);
+    expect(outbox.filter((m) => m.to === body.email).at(-1)!.subject).toMatch(/tried to create a Mavelle account/);
+    // The original password still works; the second attempt changed nothing.
+    expect((await anon().post("/api/auth/login", { email: body.email, password: PASSWORD })).status).toBe(200);
   });
 });
 

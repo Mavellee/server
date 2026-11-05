@@ -22,6 +22,11 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
     return res.status(404).json({ error: { code: "NOT_FOUND", message: "Not found." } });
   }
+  // A stored file that has gone missing (res.sendFile): report it, but answer "not found" rather than a crash.
+  if (err && typeof err === "object" && (err as { code?: string }).code === "ENOENT" && !res.headersSent) {
+    logger.warn({ path: req.path }, "stored file missing");
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Not found." } });
+  }
   logger.error({ err, path: req.path, method: req.method }, "unhandled error");
   res.status(500).json({ error: { code: "INTERNAL", message: "Something went wrong on our side. Please try again." } });
 }

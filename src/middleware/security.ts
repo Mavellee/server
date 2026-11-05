@@ -7,10 +7,14 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 /**
  * CSRF defence for cookie-authenticated requests: state-changing requests must come
- * from our own origin. Combined with SameSite=Lax cookies.
+ * from our own origin. Combined with SameSite cookies (Strict for the refresh token).
  */
 export function originCheck(req: Request, _res: Response, next: NextFunction) {
   if (SAFE_METHODS.has(req.method)) return next();
+  // Native apps send a bearer token and no cookies. Without cookies there is nothing for another site to ride on,
+  // and browsers can't attach an Authorization header cross-site here (no CORS is offered).
+  // The mobile sign-in endpoints answer in the body and set no cookies, so the same holds for them.
+  if (!req.get("cookie") && (req.get("authorization")?.startsWith("Bearer ") || req.path.startsWith("/auth/mobile/"))) return next();
   if (requestOrigin(req) !== config.appOrigin) throw new ApiError(403, "BAD_ORIGIN", "Request origin not allowed.");
   next();
 }

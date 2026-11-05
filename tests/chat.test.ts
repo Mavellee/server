@@ -4,7 +4,7 @@ import type { AddressInfo } from "node:net";
 import { io as ioClient, type Socket } from "socket.io-client";
 import { prisma } from "../src/db.js";
 import { createSocketServer } from "../src/realtime/socket.js";
-import { app, createUser, loginAs, match, ORIGIN, resetDb } from "./helpers.js";
+import { app, createUser, loginAs, match, ORIGIN, PASSWORD, resetDb } from "./helpers.js";
 
 beforeEach(resetDb);
 
@@ -160,7 +160,7 @@ describe("real-time messaging (Socket.IO)", () => {
     const [wPhone, wLaptop] = await Promise.all([connect(await cookieOf(phone)), connect(await cookieOf(laptop))]);
     const sessions = (await laptop.get("/api/settings/sessions")).body.data as { id: string; current: boolean }[];
     const other = sessions.find((s) => !s.current)!;
-    await laptop.delete(`/api/settings/sessions/${other.id}`);
+    await laptop.agent.delete(`/api/settings/sessions/${other.id}`).set("Origin", ORIGIN).send({ password: PASSWORD });
     expect(await disconnected(wPhone)).toBe(true);
     expect(wLaptop.connected).toBe(true);
   });

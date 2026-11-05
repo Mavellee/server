@@ -1,13 +1,10 @@
 import argon2 from "argon2";
-import type { Request, Response } from "express";
 import type { TokenType } from "@prisma/client";
 import { prisma } from "../../db.js";
 import { config } from "../../config.js";
 import { randomToken, sha256 } from "../../lib/crypto.js";
-import { SESSION_COOKIE } from "../../middleware/auth.js";
 import { mailer } from "../../lib/mailer.js";
 import { ageFrom } from "../../lib/age.js";
-import { disconnectSessions } from "../../realtime/bus.js";
 
 // Argon2id with OWASP-recommended minimums (19 MiB, 2 iterations).
 const HASH_OPTIONS = { type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 } as const;
@@ -22,40 +19,6 @@ export async function verifyPassword(hash: string | null, password: string) {
     return false;
   }
   return argon2.verify(hash, password).catch(() => false);
-}
-
-const cookieOptions = () => ({
-  httpOnly: true,
-  secure: config.cookieSecure,
-  sameSite: "lax" as const,
-  path: "/",
-  maxAge: config.sessionTtlMs,
-});
-
-export async function startSession(req: Request, res: Response, userId: string) {
-  const token = randomToken();
-  await prisma.session.create({
-    data: {
-      userId,
-      tokenHash: sha256(token),
-      userAgent: req.get("user-agent")?.slice(0, 255),
-      ip: req.ip,
-      expiresAt: new Date(Date.now() + config.sessionTtlMs),
-    },
-  });
-  res.cookie(SESSION_COOKIE, token, cookieOptions());
-}
-
-export function clearSessionCookie(res: Response) {
-  const { maxAge: _maxAge, ...opts } = cookieOptions();
-  res.clearCookie(SESSION_COOKIE, opts);
-}
-
-export async function revokeAllSessions(userId: string, exceptSessionId?: string) {
-  const where = { userId, revokedAt: null, ...(exceptSessionId ? { NOT: { id: exceptSessionId } } : {}) };
-  const live = await prisma.session.findMany({ where, select: { id: true } });
-  await prisma.session.updateMany({ where, data: { revokedAt: new Date() } });
-  disconnectSessions(live.map((s) => s.id));
 }
 
 const TOKEN_TTL: Record<TokenType, number> = {
