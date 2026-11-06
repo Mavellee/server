@@ -8,7 +8,8 @@ import { accountLimiter, authLimiter, sensitiveLimiter } from "../../middleware/
 import { securityEvent } from "../../lib/securityEvents.js";
 import { mailer } from "../../lib/mailer.js";
 import { config } from "../../config.js";
-import { accountView, consumeToken, hashPassword, sendPasswordResetEmail, sendVerificationEmail, verifyPassword } from "./service.js";
+import { accountView, assertAccountUsable, consumeToken, hashPassword, sendPasswordResetEmail, sendVerificationEmail, verifyPassword } from "./service.js";
+import { verifyGoogleIdToken } from "../../lib/firebaseAdmin.js";
 import {
   REFRESH_COOKIE,
   clearWebCookies,
@@ -83,10 +84,78 @@ async function checkLogin(req: Request) {
     await securityEvent("LOGIN_FAILED", req, user ? { userId: user.id } : { email: body.email });
     throw new ApiError(401, "INVALID_CREDENTIALS", "That email and password do not match.");
   }
-  if (user.status === "BANNED") throw new ApiError(403, "ACCOUNT_BANNED", "This account has been closed for violating our community guidelines.");
-  if (user.status === "PENDING_DELETION") throw new ApiError(403, "ACCOUNT_DELETED", "This account is scheduled for deletion. Contact support within 30 days to restore it.");
+  assertAccountUsable(user);
   return user;
 }
+
+const googleSignIn = z.object({
+  idToken: z.string().min(10, "Missing Google sign-in token."),
+  // Only needed the first time a brand-new email signs in with Google; see the comment below.
+  dateOfBirth: dateOfBirth.optional(),
+  ageConfirmed: z.literal(true).optional(),
+  acceptTerms: z.literal(true).optional(),
+});
+
+/**
+ * Sign in (or sign up) with Google. Firebase only proves the browser really holds a Google account for this
+ * project; everything after that reuses the normal session system, exactly like a password login.
+ *
+ * Google never tells us a date of birth, and Mavelle legally requires one (18+), so a brand-new email gets one
+ * extra, tiny step: we answer `{ needsProfile: true }` instead of signing them in, the client shows a date-of-birth
+ * + terms mini-form, and resubmits this same request with those fields filled in and the same idToken.
+ */
+authRouter.post("/google", authLimiter, accountLimiter, async (req, res) => {
+  const body = parse(googleSignIn, req.body);
+  let identity;
+  try {
+    identity = await verifyGoogleIdToken(body.idToken);
+  } catch (e) {
+    await securityEvent("GOOGLE_LOGIN_FAILED", req, { metadata: { reason: e instanceof Error ? e.message : "unknown" } });
+    throw new ApiError(401, "INVALID_GOOGLE_TOKEN", "We couldn't verify that Google sign-in. Please try again.");
+  }
+  if (!identity.emailVerified) throw new ApiError(403, "GOOGLE_EMAIL_UNVERIFIED", "Google has not verified this email address yet.");
+
+  let user = await prisma.user.findUnique({ where: { googleId: identity.uid } });
+  if (!user) {
+    const byEmail = await prisma.user.findUnique({ where: { email: identity.email } });
+    if (byEmail) {
+      // Same, Google-verified email as an existing account (password-based or not): link it, no extra step needed.
+      // Google proved the address, so a never-verified password account is activated too.
+      user = await prisma.user.update({
+        where: { id: byEmail.id },
+        data: {
+          googleId: identity.uid,
+          emailVerifiedAt: byEmail.emailVerifiedAt ?? new Date(),
+          status: byEmail.status === "PENDING_VERIFICATION" ? "ACTIVE" : byEmail.status,
+        },
+      });
+    } else {
+      if (!body.dateOfBirth || !body.ageConfirmed || !body.acceptTerms) {
+        return ok(res, { needsProfile: true, email: identity.email, name: identity.name });
+      }
+      if (ageFrom(body.dateOfBirth) < 18) throw new ApiError(422, "UNDERAGE", "Mavelle is only for adults aged 18 and over.");
+      user = await prisma.user.create({
+        data: {
+          email: identity.email,
+          googleId: identity.uid,
+          status: "ACTIVE",
+          emailVerifiedAt: new Date(),
+          dateOfBirth: body.dateOfBirth,
+          ageConfirmedAt: new Date(),
+          settings: { create: {} },
+          subscription: { create: {} },
+        },
+      });
+      await securityEvent("GOOGLE_REGISTER", req, { userId: user.id });
+    }
+  }
+  assertAccountUsable(user);
+
+  const pair = await createSession(req, user.id, "WEB");
+  setWebCookies(res, pair);
+  await securityEvent("GOOGLE_LOGIN", req, { userId: user.id, sessionId: pair.sessionId, metadata: { client: "WEB" } });
+  ok(res, await accountView(user.id));
+});
 
 authRouter.post("/login", authLimiter, accountLimiter, async (req, res) => {
   const user = await checkLogin(req);
