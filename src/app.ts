@@ -43,7 +43,26 @@ export function createApp() {
       },
     }),
   );
-  app.use(helmet({ crossOriginResourcePolicy: { policy: "same-origin" } }));
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: "same-origin" },
+      // Default "same-origin" breaks the Google sign-in popup: it can no longer tell the opener it has
+      // finished, so the sign-in call never resolves. "same-origin-allow-popups" keeps the isolation but lets a
+      // popup we opened report back to us.
+      crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+      contentSecurityPolicy: {
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          // Firebase's client SDK calls these from the page itself (sign-in and token refresh).
+          "connect-src": ["'self'", "https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"],
+          // A brief handshake frame Firebase opens against the project's own authDomain during sign-in.
+          "frame-src": ["'self'", "https://*.firebaseapp.com"],
+          // Google account profile photos.
+          "img-src": ["'self'", "data:", "https://*.googleusercontent.com"],
+        },
+      },
+    }),
+  );
   app.use(express.json({ limit: "100kb" }));
   app.use(cookieParser());
 

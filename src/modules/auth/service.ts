@@ -5,6 +5,7 @@ import { config } from "../../config.js";
 import { randomToken, sha256 } from "../../lib/crypto.js";
 import { mailer } from "../../lib/mailer.js";
 import { ageFrom } from "../../lib/age.js";
+import { ApiError } from "../../lib/http.js";
 
 // Argon2id with OWASP-recommended minimums (19 MiB, 2 iterations).
 const HASH_OPTIONS = { type: argon2.argon2id, memoryCost: 19456, timeCost: 2, parallelism: 1 } as const;
@@ -62,6 +63,12 @@ export async function sendPasswordResetEmail(userId: string, email: string) {
     subject: "Reset your Mavelle password",
     text: `Someone asked to reset the password for your Mavelle account.\n\nChoose a new password here:\n${config.appOrigin}/reset-password#token=${token}\n\nThis link expires in 1 hour. If this was not you, you can ignore this email; your password will not change.`,
   });
+}
+
+/** Shared by every sign-in path (password or Google): a closed or pending-deletion account never gets a session. */
+export function assertAccountUsable(user: { status: string }) {
+  if (user.status === "BANNED") throw new ApiError(403, "ACCOUNT_BANNED", "This account has been closed for violating our community guidelines.");
+  if (user.status === "PENDING_DELETION") throw new ApiError(403, "ACCOUNT_DELETED", "This account is scheduled for deletion. Contact support within 30 days to restore it.");
 }
 
 /** The signed-in user's own view of their account. Never includes the password hash. */

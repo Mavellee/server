@@ -195,7 +195,8 @@ enum SubscriptionStatus {
 model User {
   id                  String        @id @default(uuid()) @db.Uuid
   email               String        @unique // stored lower-cased
-  passwordHash        String
+  passwordHash        String? // null for Google-only accounts
+  googleId            String?       @unique // Firebase/Google "sub" claim, once signed in with Google
   role                Role          @default(USER)
   status              AccountStatus @default(PENDING_VERIFICATION)
   emailVerifiedAt     DateTime?

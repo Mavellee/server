@@ -22,6 +22,10 @@ const schema = z.object({
   // Ed25519 private key (PKCS#8 PEM, or that PEM base64-encoded). Required in production.
   AUTH_JWT_PRIVATE_KEY: z.string().optional(),
   AUTH_ISSUER: z.string().default("mavelle-api"),
+  // Google sign-in (verifies the Firebase ID token the browser sends). Leave all three empty to disable it.
+  FIREBASE_PROJECT_ID: z.string().optional(),
+  FIREBASE_CLIENT_EMAIL: z.string().optional(),
+  FIREBASE_PRIVATE_KEY: z.string().optional(),
   COOKIE_SECURE: bool,
   TRUST_PROXY: int(0),
   UPLOAD_DIR: z.string().default("./uploads"),
@@ -82,6 +86,11 @@ export const config = {
     privateKey: env.AUTH_JWT_PRIVATE_KEY,
     issuer: env.AUTH_ISSUER,
   },
+  // The .env value escapes newlines as \n (it has to be one line in a .env file); undo that here.
+  firebase:
+    env.FIREBASE_PROJECT_ID && env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY
+      ? { projectId: env.FIREBASE_PROJECT_ID, clientEmail: env.FIREBASE_CLIENT_EMAIL, privateKey: env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n") }
+      : null,
   cookieSecure: env.COOKIE_SECURE || env.NODE_ENV === "production",
   trustProxy: env.TRUST_PROXY,
   uploadDir: env.UPLOAD_DIR,
