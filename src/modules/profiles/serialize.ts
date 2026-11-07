@@ -3,6 +3,7 @@ import { ageFrom } from "../../lib/age.js";
 import { approxDistanceLabel, distanceKm } from "../../lib/geo.js";
 import { promptText } from "../../lib/prompts.js";
 import { zodiacApplies, zodiacSign } from "../../lib/zodiac.js";
+import { publicVitals } from "../../lib/vitals.js";
 
 /** Everything needed to render a profile card. Note: no email, no date of birth, no coordinates leave this module. */
 export const publicProfileInclude = {
@@ -53,6 +54,8 @@ export function toPublicProfile(user: PublicProfileSource, viewer?: Viewer, opts
     distance,
     bio: p.bio,
     languages: p.languages,
+    // Only stated, visible vitals, already labelled. Hidden ones and saved dealbreakers never leave the server.
+    vitals: publicVitals(p),
     intentions: user.preferences.map((x) => x.intention),
     interests,
     sharedInterestCount: interests.filter((i) => i.shared).length,

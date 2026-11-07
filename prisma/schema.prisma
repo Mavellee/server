@@ -341,6 +341,20 @@ model Profile {
   ageMin            Int             @default(18)
   ageMax            Int             @default(60)
   maxDistanceKm     Int? // null = anywhere
+  // Optional vitals (keys validated against src/lib/vitals.ts). Hidden ones behave as unanswered for everyone else.
+  heightCm          Int?
+  jobTitle          String?
+  education         String?
+  religion          String?
+  motherTongue      String?
+  diet              String?
+  drinking          String?
+  smoking           String?
+  children          String?
+  familyPlans       String?
+  hiddenVitals      String[]        @default([])
+  // Saved dealbreakers that narrow Discover (shape: Dealbreakers in src/lib/vitals.ts). Private to the owner.
+  dealbreakers      Json?
   isPublished       Boolean         @default(false)
   isDiscoverable    Boolean         @default(true) // privacy: appear in others' Discover
   discoveryPausedAt DateTime?

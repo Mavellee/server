@@ -6,6 +6,27 @@ import { blockedUserIds } from "../../lib/safety.js";
 import { badRequest } from "../../lib/http.js";
 import { publicProfileInclude, toPublicProfile, type Viewer } from "../profiles/serialize.js";
 import { compatibilitySummaries } from "../compatibility/service.js";
+import { CHOICE_VITALS, readDealbreakers, type Dealbreakers } from "../../lib/vitals.js";
+
+/**
+ * Turns saved dealbreakers into conditions on candidates' profiles. A hidden vital counts as unanswered,
+ * so filtering can never reveal something its owner chose to hide. One-way: they narrow only who I see.
+ */
+export function dealbreakerConditions(d: Dealbreakers): Prisma.ProfileWhereInput[] {
+  const out: Prisma.ProfileWhereInput[] = [];
+  const unstated = (key: string, column: Prisma.ProfileWhereInput): Prisma.ProfileWhereInput[] => (d.includeUnstated ? [column, { hiddenVitals: { has: key } }] : []);
+  for (const key of CHOICE_VITALS) {
+    const list = d[key];
+    if (!list?.length) continue;
+    out.push({ OR: [{ [key]: { in: list }, NOT: { hiddenVitals: { has: key } } }, ...unstated(key, { [key]: null })] });
+  }
+  if (d.heightMinCm || d.heightMaxCm) {
+    out.push({
+      OR: [{ heightCm: { ...(d.heightMinCm ? { gte: d.heightMinCm } : {}), ...(d.heightMaxCm ? { lte: d.heightMaxCm } : {}) }, NOT: { hiddenVitals: { has: "height" } } }, ...unstated("height", { heightCm: null })],
+    });
+  }
+  return out;
+}
 
 export async function viewerFor(userId: string): Promise<Viewer> {
   const [profile, interests] = await Promise.all([
@@ -73,6 +94,7 @@ export async function candidateWhere(userId: string, filters: DiscoveryFilters =
       interestedIn: { has: p.gender },
       ageMin: { lte: myAge },
       ageMax: { gte: myAge },
+      AND: dealbreakerConditions(readDealbreakers(p.dealbreakers)),
     },
     AND: [
       // They are looking for what I want to see...

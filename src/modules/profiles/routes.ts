@@ -15,10 +15,23 @@ import { mediaLimits, ownMediaRouter, ownMediaView } from "./media.js";
 
 export { photosRouter } from "./media.js";
 import { viewerFor } from "../discovery/service.js";
+import { CHOICE_VITALS, HEIGHT_MAX_CM, HEIGHT_MIN_CM, JOB_TITLE_MAX, VITAL_CHOICES, VITAL_KEYS, VITAL_LABELS, isChoice, readDealbreakers, type ChoiceVital } from "../../lib/vitals.js";
 import { compatibilityFor } from "../compatibility/service.js";
 
 
 const intentionList = z.array(z.nativeEnum(Intention)).max(3);
+const height = z.number().int().min(HEIGHT_MIN_CM, `Height must be at least ${HEIGHT_MIN_CM} cm.`).max(HEIGHT_MAX_CM, `Height must be at most ${HEIGHT_MAX_CM} cm.`);
+const choice = (key: ChoiceVital) => z.string().refine((v) => isChoice(key, v), "Choose one of the listed options.");
+const choiceFields = Object.fromEntries(CHOICE_VITALS.map((k) => [k, choice(k).nullable()])) as Record<ChoiceVital, z.ZodNullable<z.ZodEffects<z.ZodString>>>;
+const dealbreakerSchema = z
+  .object({
+    heightMinCm: height.optional(),
+    heightMaxCm: height.optional(),
+    includeUnstated: z.boolean().default(true),
+    ...(Object.fromEntries(CHOICE_VITALS.map((k) => [k, z.array(choice(k)).max(30).optional()])) as Record<ChoiceVital, z.ZodOptional<z.ZodArray<z.ZodEffects<z.ZodString>>>>),
+  })
+  .strict()
+  .refine((d) => !d.heightMinCm || !d.heightMaxCm || d.heightMaxCm >= d.heightMinCm, { message: "Maximum height must be at least the minimum.", path: ["heightMaxCm"] });
 const profileSchema = z
   .object({
     displayName: z.string().trim().min(1, "Add a display name.").max(40),
@@ -35,6 +48,11 @@ const profileSchema = z
     ageMin: z.number().int().min(18).max(100),
     ageMax: z.number().int().min(18).max(100),
     maxDistanceKm: z.number().int().min(1).max(20000).nullable(),
+    heightCm: height.nullable(),
+    jobTitle: z.string().trim().max(JOB_TITLE_MAX).nullable(),
+    ...choiceFields,
+    hiddenVitals: z.array(z.enum(VITAL_KEYS)).max(VITAL_KEYS.length),
+    dealbreakers: dealbreakerSchema,
   })
   .partial()
   .refine((v) => v.ageMin === undefined || v.ageMax === undefined || v.ageMax >= v.ageMin, {
@@ -73,6 +91,13 @@ async function ownProfile(userId: string) {
     ageMin: p?.ageMin ?? 18,
     ageMax: p?.ageMax ?? 60,
     maxDistanceKm: p?.maxDistanceKm ?? null,
+    vitals: {
+      heightCm: p?.heightCm ?? null,
+      jobTitle: p?.jobTitle ?? null,
+      ...(Object.fromEntries(CHOICE_VITALS.map((k) => [k, p?.[k] ?? null])) as Record<ChoiceVital, string | null>),
+    },
+    hiddenVitals: p?.hiddenVitals ?? [],
+    dealbreakers: readDealbreakers(p?.dealbreakers),
     isPublished: p?.isPublished ?? false,
     isDiscoverable: p?.isDiscoverable ?? true,
     discoveryPaused: !!p?.discoveryPausedAt,
@@ -131,6 +156,12 @@ profilesRouter.patch("/me", async (req, res) => {
     ageMin: body.ageMin,
     ageMax: body.ageMax,
     maxDistanceKm: body.maxDistanceKm,
+    heightCm: body.heightCm,
+    jobTitle: body.jobTitle === undefined ? undefined : cleanPrompt(body.jobTitle ?? "") || null,
+    ...Object.fromEntries(CHOICE_VITALS.map((k) => [k, body[k]])),
+    hiddenVitals: body.hiddenVitals ? [...new Set(body.hiddenVitals)] : undefined,
+    // Stored in the same shape readDealbreakers returns; empty lists are dropped.
+    dealbreakers: body.dealbreakers ? (readDealbreakers(body.dealbreakers) as unknown as Prisma.InputJsonValue) : undefined,
     ...coords,
   };
 
@@ -221,5 +252,6 @@ metaRouter.get("/interests", async (_req, res) => {
   const interests = await prisma.interest.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] });
   ok(res, interests.map(({ slug, name, category }) => ({ slug, name, category })));
 });
+metaRouter.get("/vitals", (_req, res) => ok(res, { keys: VITAL_KEYS, labels: VITAL_LABELS, choices: VITAL_CHOICES, height: { min: HEIGHT_MIN_CM, max: HEIGHT_MAX_CM }, jobTitleMax: JOB_TITLE_MAX }));
 metaRouter.get("/cities", (_req, res) => ok(res, CITIES.map(({ name, region }) => ({ name, region }))));
 
